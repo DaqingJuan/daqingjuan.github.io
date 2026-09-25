@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="冷笑話製冰所：每則冷笑話都標上冷度，可以搜尋、分類、隨機抽一則。">
+<title>冷笑話製冰所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  :root {
+    --bg: #eaf1f3;
+    --surface: #f8fbfc;
+    --ink: #14263b;
+    --muted: #5b6f80;
+    --line: #c9d8df;
+    --ice: #5aa2c8;
+    --ice-soft: #d4e8f2;
+    --hot: #e0553a;
+    --display: "Huninn", "Noto Sans TC", "PingFang TC", sans-serif;
+    --body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0d1824;
+      --surface: #142434;
+      --ink: #e4eef3;
+      --muted: #8ea4b4;
+      --line: #25394c;
+      --ice: #7cc0e3;
+      --ice-soft: #1c3a50;
+      --hot: #f07a5f;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1824;
+    --surface: #142434;
+    --ink: #e4eef3;
+    --muted: #8ea4b4;
+    --line: #25394c;
+    --ice: #7cc0e3;
+    --ice-soft: #1c3a50;
+    --hot: #f07a5f;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.7;
+    padding-inline: 16px;
+    padding-block: 40px 64px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; display: grid; gap: 40px; }
+
+  header { display: grid; gap: 12px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ice);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(40px, 9vw, 72px);
+    line-height: 1.1;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 .flake { color: var(--ice); }
+  .lede { margin: 0; color: var(--muted); max-width: 36em; }
+
+  /* 今日特製冰塊 */
+  .feature {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 20px;
+    padding: 28px;
+    display: grid;
+    gap: 16px;
+  }
+  .feature .label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; opacity: 0.7; }
+  .feature .q { font-family: var(--display); font-size: clamp(22px, 4.5vw, 30px); line-height: 1.4; margin: 0; }
+  .feature .a {
+    font-family: var(--display);
+    font-size: clamp(20px, 4vw, 26px);
+    color: var(--ice);
+    margin: 0;
+  }
+  .feature-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  .btn-ice { background: var(--ice); color: #0d1824; }
+  .btn-ghost { background: transparent; color: var(--bg); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .btn:focus-visible, .chip:focus-visible, .card:focus-visible, input:focus-visible {
+    outline: 3px solid var(--hot);
+    outline-offset: 2px;
+  }
+
+  /* 工具列 */
+  .tools { display: grid; gap: 14px; }
+  .search {
+    width: 100%;
+    font: inherit;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit;
+    font-size: 14px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* 笑話卡片 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .card:hover { border-color: var(--ice); transform: translateY(-2px); }
+  .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .tag { font-size: 12px; color: var(--muted); }
+  .temp {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ice);
+    background: var(--ice-soft);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .card .q { margin: 0; font-weight: 500; }
+  .card .a {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--ice);
+    border-top: 1.5px dashed var(--line);
+    padding-top: 10px;
+  }
+  .card .hint { margin: 0; font-size: 13px; color: var(--muted); border-top: 1.5px dashed var(--line); padding-top: 10px; }
+  .empty { color: var(--muted); text-align: center; padding-block: 32px; }
+
+  /* 冷度說明 */
+  .scale { display: grid; gap: 10px; }
+  .scale h2 { font-family: var(--display); font-weight: 400; font-size: 22px; margin: 0; }
+  .bar {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #cfe6f2, #5aa2c8 50%, #1d4f73);
+  }
+  .bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  footer { font-size: 13px; color: var(--muted); text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { transition: none; }
+    .card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Daqing's Joke Freezer</span>
+    <h1>冷笑話<span class="flake">製冰所</span></h1>
+    <p class="lede">每一則笑話都經過急速冷凍，並標上冷度。數字越低越冷，看完記得多穿一件外套。</p>
+  </header>
+
+  <section class="feature" aria-live="polite">
+    <span class="label" id="feature-label">今日特製冰塊</span>
+    <p class="q" id="feature-q"></p>
+    <p class="a" id="feature-a" hidden></p>
+    <div class="feature-actions">
+      <button class="btn btn-ice" id="reveal-btn" type="button">揭曉答案</button>
+      <button class="btn btn-ghost" id="random-btn" type="button">再來一塊 🧊</button>
+    </div>
+  </section>
+
+  <section class="tools" aria-label="搜尋與分類">
+    <input class="search" id="search" type="search" placeholder="搜尋笑話，例如：動物、老闆、水果">
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="grid" id="grid" aria-label="笑話列表"></section>
+  <p class="empty" id="empty" hidden>找不到這塊冰，換個關鍵字試試看。</p>
+
+  <section class="scale" aria-label="冷度說明">
+    <h2>冷度計</h2>
+    <div class="bar"></div>
+    <div class="bar-labels"><span>−5°C 微涼</span><span>−20°C 起雞皮疙瘩</span><span>−40°C 全場結冰</span></div>
+  </section>
+
+  <footer>© 2026 DaqingJuan · 冷笑話製冰所</footer>
+</div>
+
+<script>
+  const jokes = [
+    { q: "什麼動物最容易被貼在牆上？", a: "海豹（海報）", cat: "諧音", t: -28 },
+    { q: "冰塊最想做什麼事？", a: "退伍（退冰）", cat: "諧音", t: -35 },
+    { q: "為什麼蠶寶寶很有錢？", a: "因為牠會結繭（節儉）", cat: "諧音", t: -30 },
+    { q: "哪一種動物最沒有方向感？", a: "麋鹿（迷路）", cat: "諧音", t: -22 },
+    { q: "鉛筆姓什麼？", a: "蕭（削）", cat: "諧音", t: -38 },
+    { q: "為什麼電腦總是覺得很冷？", a: "因為它開了 Windows（窗戶）", cat: "諧音", t: -18 },
+    { q: "哪一種布剪不斷？", a: "瀑布", cat: "急轉彎", t: -12 },
+    { q: "什麼門永遠關不上？", a: "球門", cat: "急轉彎", t: -10 },
+    { q: "太平洋的正中間是什麼？", a: "平", cat: "急轉彎", t: -25 },
+    { q: "什麼東西越洗越髒？", a: "水", cat: "急轉彎", t: -8 },
+    { q: "哪個字所有人都會唸錯？", a: "錯", cat: "急轉彎", t: -15 },
+    { q: "什麼車最長？", a: "塞車", cat: "急轉彎", t: -14 },
+    { q: "小明的爸爸有三個兒子，老大叫大毛，老二叫二毛，老三叫什麼？", a: "小明", cat: "急轉彎", t: -6 },
+    { q: "什麼人一年只上一天班？", a: "聖誕老公公", cat: "生活", t: -9 },
+    { q: "牛頓被蘋果砸到，發現了萬有引力。如果被榴槤砸到，會發現什麼？", a: "醫院", cat: "生活", t: -20 },
+    { q: "老闆問我：你對這份工作有什麼期待？", a: "我說：期待下班", cat: "生活", t: -16 },
+    { q: "老師問：你為什麼遲到？", a: "學生：因為校門口的牌子寫「學校前，慢行」", cat: "生活", t: -24 },
+    { q: "為什麼股票跌了，我的心情卻很平靜？", a: "因為我根本沒錢買股票", cat: "生活", t: -32 },
+  ];
+
+  const cats = ["全部", ...new Set(jokes.map(j => j.cat))];
+  let activeCat = "全部";
+  const revealed = new Set();
+
+  const grid = document.getElementById("grid");
+  const empty = document.getElementById("empty");
+  const chipsEl = document.getElementById("chips");
+  const searchEl = document.getElementById("search");
+
+  function renderChips() {
+    chipsEl.innerHTML = "";
+    cats.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = c;
+      b.setAttribute("aria-pressed", String(c === activeCat));
+      b.addEventListener("click", () => { activeCat = c; renderChips(); renderGrid(); });
+      chipsEl.appendChild(b);
+    });
+  }
+
+  function renderGrid() {
+    const kw = searchEl.value.trim();
+    const list = jokes
+      .map((j, i) => ({ ...j, i }))
+      .filter(j => activeCat === "全部" || j.cat === activeCat)
+      .filter(j => !kw || (j.q + j.a + j.cat).includes(kw));
+
+    grid.innerHTML = "";
+    empty.hidden = list.length > 0;
+
+    list.forEach(j => {
+      const open = revealed.has(j.i);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "card";
+      card.setAttribute("aria-expanded", String(open));
+      card.innerHTML = `
+        <div class="card-top"><span class="tag">${j.cat}</span><span class="temp">${j.t}°C</span></div>
+        <p class="q"></p>
+        ${open ? '<p class="a"></p>' : '<p class="hint">點一下揭曉答案</p>'}`;
+      card.querySelector(".q").textContent = j.q;
+      if (open) card.querySelector(".a").textContent = j.a;
+      card.addEventListener("click", () => {
+        open ? revealed.delete(j.i) : revealed.add(j.i);
+        renderGrid();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  let featureIdx = new Date().getDate() % jokes.length;
+  const fq = document.getElementById("feature-q");
+  const fa = document.getElementById("feature-a");
+  const revealBtn = document.getElementById("reveal-btn");
+
+  function showFeature(label) {
+    const j = jokes[featureIdx];
+    document.getElementById("feature-label").textContent = `${label} · ${j.t}°C`;
+    fq.textContent = j.q;
+    fa.textContent = j.a;
+    fa.hidden = true;
+    revealBtn.hidden = false;
+  }
+
+  revealBtn.addEventListener("click", () => { fa.hidden = false; revealBtn.hidden = true; });
+  document.getElementById("random-btn").addEventListener("click", () => {
+    let next;
+    do { next = Math.floor(Math.random() * jokes.length); } while (next === featureIdx && jokes.length > 1);
+    featureIdx = next;
+    showFeature("隨機冰塊");
+  });
+  searchEl.addEventListener("input", renderGrid);
+
+  showFeature("今日特製冰塊");
+  renderChips();
+  renderGrid();
+</script>
+</body>
+</html>
