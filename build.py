@@ -9,6 +9,7 @@
   j/<編號>/      每則笑話的獨立頁面
   sitemap.xml    網站地圖
   robots.txt     告訴搜尋引擎可以收錄
+  og.jpg、j/<編號>/og.jpg   分享到 LINE / Facebook 時的預覽圖（需要 Pillow 與 ../工具/fonts）
 """
 import datetime
 import html
@@ -18,6 +19,15 @@ import shutil
 from pathlib import Path
 
 SITE = "https://daqingjuan.github.io/"
+
+try:
+    import og
+    OG = og.fonts_ready()
+    if not OG:
+        print("提醒：找不到 ../工具/fonts 裡的字型，這次不產生預覽圖")
+except ImportError:
+    OG = False
+    print("提醒：沒有安裝 Pillow，這次不產生預覽圖（安裝：python3 -m pip install --user pillow）")
 ROOT = Path(__file__).resolve().parent
 TODAY = datetime.date.today().isoformat()
 
@@ -63,6 +73,11 @@ def build_index(jokes):
     s, n2 = re.subn(r"<!--CARDS-->.*?<!--/CARDS-->", lambda m: f"<!--CARDS-->{cards}<!--/CARDS-->", s, flags=re.S)
     assert n1 == 1 and n2 == 1, "index.html 裡找不到 JOKES 或 CARDS 標記"
     n = len(jokes)
+    if OG:
+        og.home_image(ROOT / "og.jpg", n)
+        tags = og_tags(SITE + "og.jpg", "冷笑話製冰所")
+        s, k = re.subn(r"<!--OG-->.*?<!--/OG-->", lambda m: f"<!--OG-->\n{tags}\n<!--/OG-->", s, flags=re.S)
+        assert k == 1, "index.html 裡找不到 OG 標記"
     for pat in (r"冷笑話大全｜\d+ 則", r"冷笑話大全：\d+ 則", r"製冰所｜\d+ 則", r"收錄 \d+ 則"):
         s = re.sub(pat, lambda m: re.sub(r"\d+", str(n), m.group(0)), s)
     p.write_text(s, encoding="utf-8")
@@ -118,7 +133,16 @@ FAVICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox
            "%3Cpath d='M32 6 56 19 32 32 8 19z' fill='%23e6f6fd'/%3E%3Cpath d='M32 32v26L8 45V19z' fill='%235ab0dc'/%3E%3C/svg%3E")
 
 
-def head(title, desc, url, extra=""):
+def og_tags(img_url, alt):
+    if not img_url:
+        return '<meta name="twitter:card" content="summary">'
+    return (f'<meta property="og:image" content="{img_url}">\n'
+            f'<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+            f'<meta property="og:image:alt" content="{esc(alt)}">\n'
+            f'<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="{img_url}">')
+
+
+def head(title, desc, url, extra="", img_url=None):
     return f"""<!DOCTYPE html>
 <html lang="zh-Hant-TW">
 <head>
@@ -133,7 +157,7 @@ def head(title, desc, url, extra=""):
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{url}">
-<meta name="twitter:card" content="summary">
+{og_tags(img_url, title)}
 <link rel="icon" href="{FAVICON}">
 <script>try{{const t=localStorage.getItem("icefactory:theme");if(t==='"light"'||t==='"dark"')document.documentElement.dataset.theme=JSON.parse(t)}}catch(e){{}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -169,6 +193,8 @@ def build_page(j, jokes):
     extra = '<script type="application/ld+json">' + json.dumps(crumbs, ensure_ascii=False) + "</script>"
     prev_j = jokes[(j["id"] - 2) % n]
     next_j = jokes[j["id"] % n]
+    out = ROOT / "j" / str(j["id"])
+    out.mkdir(parents=True, exist_ok=True)
     rel = "\n".join(
         f'<li><a href="/j/{r["id"]}/"><small>{r["no"]}</small><span>{esc(r["q"])}</span></a></li>' for r in related(j, jokes)
     )
@@ -205,9 +231,11 @@ document.getElementById("share").addEventListener("click",async()=>{{
 </body>
 </html>
 """
-    out = ROOT / "j" / str(j["id"])
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "index.html").write_text(head(title, desc, url, extra) + body, encoding="utf-8")
+    img_url = None
+    if OG:
+        og.joke_image(out / "og.jpg", j, fmt)
+        img_url = url + "og.jpg"
+    (out / "index.html").write_text(head(title, desc, url, extra, img_url) + body, encoding="utf-8")
 
 
 def build_404():
@@ -239,7 +267,7 @@ def main():
         build_page(j, jokes)
     build_404()
     build_sitemap(jokes)
-    print(f"完成：{len(jokes)} 則笑話、{len(jokes)} 個獨立頁面、sitemap.xml、robots.txt、404.html")
+    print(f"完成：{len(jokes)} 則笑話、{len(jokes)} 個獨立頁面、sitemap.xml、robots.txt、404.html" + ("、預覽圖" if OG else ""))
 
 
 if __name__ == "__main__":
