@@ -2,7 +2,8 @@
 
 需要：
   python3 -m pip install --user pillow
-  字型放在 ../工具/fonts/（Huninn-Regular.ttf、NotoSansTC.ttf，皆為 Google Fonts 的開源字型）
+  字型放在 _tools/fonts/（Huninn-Regular.ttf、NotoSansTC.ttf，皆為 Google Fonts 的開源字型，授權見同資料夾的 OFL 檔）
+  資料夾名稱以底線開頭，GitHub Pages 不會把它公開到網站上
 """
 import math
 import random
@@ -11,7 +12,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 W, H = 1200, 630
-FONT_DIR = Path(__file__).resolve().parent.parent / "工具" / "fonts"
+FONT_DIR = Path(__file__).resolve().parent / "_tools" / "fonts"
 BG = (6, 16, 26)
 INK = (230, 241, 246)
 MUTED = (141, 163, 179)

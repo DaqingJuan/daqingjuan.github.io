@@ -9,7 +9,7 @@
   j/<編號>/      每則笑話的獨立頁面
   sitemap.xml    網站地圖
   robots.txt     告訴搜尋引擎可以收錄
-  og.jpg、j/<編號>/og.jpg   分享到 LINE / Facebook 時的預覽圖（需要 Pillow 與 ../工具/fonts）
+  og.jpg、j/<編號>/og.jpg   分享到 LINE / Facebook 時的預覽圖（需要 Pillow，字型在 _tools/fonts）
 """
 import datetime
 import html
@@ -24,7 +24,7 @@ try:
     import og
     OG = og.fonts_ready()
     if not OG:
-        print("提醒：找不到 ../工具/fonts 裡的字型，這次不產生預覽圖")
+        print("提醒：找不到 _tools/fonts 裡的字型，這次不產生預覽圖")
 except ImportError:
     OG = False
     print("提醒：沒有安裝 Pillow，這次不產生預覽圖（安裝：python3 -m pip install --user pillow）")
