@@ -214,7 +214,7 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
       </ul>
       <h3>車衝馬斜炮飛山</h3>
       <ul>
-        <li>車衝：俥車可以直線衝到底，經過的格子要是空的，可以吃路上碰到的第一顆棋。</li>
+        <li>車衝：俥車可以直線衝到底（經過的格子要是空的），吃路上碰到的第一顆棋。中間至少隔一個空格衝過去，什麼都能吃；緊貼著的話照一般大小規則。</li>
         <li>馬斜：傌馬只能斜走一格、斜吃一格，不能上下左右走。</li>
         <li>炮飛山：炮包隔一顆棋飛過去吃，距離不限。</li>
         <li>吃暗棋：可以直接攻擊蓋著的棋，被攻擊的棋會翻開。是對方的棋而且吃得下，就吃掉；是自己的棋或比自己大，就停在原地、換對方下。</li>
@@ -429,18 +429,18 @@ function canEat(a, d){
 function targets(b, i, variant, capOnly){
   const p = b[i]; if (!p || !p.up) return [];
   const chain = variant === 'chain', out = [], [r,c] = rc(i);
-  const consider = (j) => { // a piece-occupied square reached by a capturing path
+  const consider = (j, charged) => { // a piece-occupied square reached by a capturing path
     const q = b[j];
     if (!q.up){ if (chain) out.push({to:j, kind:'dark'}); }
-    else if (q.side !== p.side && canEat(p, q)) out.push({to:j, kind:'cap'});
+    else if (q.side !== p.side && (charged || canEat(p, q))) out.push({to:j, kind:'cap'});
   };
   if (p.t === 'R' && chain){
     for (const [dr,dc] of ORTH){
-      let nr=r+dr, nc=c+dc;
+      let nr=r+dr, nc=c+dc, steps=0;
       while (inb(nr,nc)){
-        const j = nr*4+nc;
+        const j = nr*4+nc; steps++;
         if (!b[j]){ out.push({to:j, kind:'move'}); nr+=dr; nc+=dc; continue; }
-        consider(j); break;
+        consider(j, steps > 1); break;   // 車衝: at least one empty square in between → eats anything
       }
     }
   } else {
@@ -495,9 +495,11 @@ function apply(s0, act){
     endTurn(s);
   } else {
     const att = b[act.from], def = b[act.to];
+    const [fr, fc] = rc(act.from), [tr, tc] = rc(act.to);
+    const charged = s.variant === 'chain' && att.t === 'R' && Math.abs(fr-tr) + Math.abs(fc-tc) > 1;
     if (def && !def.up){                       // attack a face-down piece
       def.up = true; s.idle = 0;
-      if (def.side !== att.side && canEat(att, def)){
+      if (def.side !== att.side && (charged || canEat(att, def))){
         s.captured[def.side].push(def.t);
         b[act.to] = att; b[act.from] = null;
         s.last = {type:'cap', dark:true, from:act.from, to:act.to, t:def.t, side:def.side, v:def.v};
