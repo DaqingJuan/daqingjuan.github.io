@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#123a2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>兄妹暗棋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&text=帥仕相俥傌炮兵將士象車馬包卒兄妹暗棋紅黑勝和&display=swap">
+<style>
+/* Layout: one phone screen — opponent bar, 4×8 felt board, my bar, action row. Single deliberate look: green card-table felt + ivory pieces. */
+:root{
+  --felt:#123a2c; --felt-2:#0d2c21; --felt-line:rgba(233,226,200,.16);
+  --ivory:#efe6cc; --ivory-edge:#c9bb93; --ink:#1d1f22; --red:#b3261e;
+  --brass:#d9b25f; --text:#ecebe3; --muted:#9db3a6; --danger:#e0645a;
+  --piece-font:"Noto Serif TC","Songti TC","STSong",serif;
+  --ui-font:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(120% 80% at 50% 30%,var(--felt) 0%,var(--felt-2) 100%) fixed,var(--felt-2);color:var(--text);font:15px/1.5 var(--ui-font);
+  padding:env(safe-area-inset-top,0) 16px env(safe-area-inset-bottom,0);overflow-x:hidden;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+[hidden]{display:none!important}
+
+/* ---------- lobby ---------- */
+.lobby{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding-block:32px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .disc{width:64px;height:64px;font-size:38px}
+.brand h1{font:900 40px/1 var(--piece-font);margin:0;letter-spacing:.08em}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.card{background:rgba(0,0,0,.22);border:1px solid var(--felt-line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.card h2{margin:0;font-size:13px;letter-spacing:.12em;color:var(--muted);font-weight:600}
+label{font-size:13px;color:var(--muted)}
+input{width:100%;font:inherit;font-size:17px;padding:12px 14px;border-radius:10px;border:1px solid var(--felt-line);background:rgba(0,0,0,.3);color:var(--text)}
+input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-numeric:tabular-nums}
+.btn{padding:13px 16px;border-radius:11px;font-weight:700;font-size:16px;background:var(--brass);color:#21190a;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--felt-line);font-weight:600}
+.btn.small{padding:8px 12px;font-size:14px}
+.row{display:flex;gap:10px}
+.row > *{flex:1;min-width:0}
+.rules{color:var(--muted);font-size:13px;line-height:1.7}
+.rules summary{cursor:pointer;color:var(--text)}
+.rules ol{padding-left:20px;margin:8px 0 0}
+.err{color:var(--danger);font-size:14px;min-height:1.2em;margin:0}
+
+/* ---------- game ---------- */
+.game{flex:1;display:flex;flex-direction:column;gap:8px;padding-block:8px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:rgba(0,0,0,.25);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:#6fd08c}.dot.wait{background:var(--brass);animation:blink 1s infinite}.dot.bad{background:var(--danger)}
+@keyframes blink{50%{opacity:.3}}
+.room{font-variant-numeric:tabular-nums;letter-spacing:.15em;color:var(--text);font-weight:700}
+
+.player{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid transparent;transition:background .2s,border-color .2s}
+.player.active{background:rgba(217,178,95,.12);border-color:rgba(217,178,95,.5)}
+.player .who{display:flex;flex-direction:column;min-width:0;flex:0 0 auto;max-width:42%}
+.player .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player .side{font-size:12px;color:var(--muted)}
+.player .side b{font-weight:700}
+.side .r{color:#ff8a7e}.side .k{color:var(--ivory)}
+.caps{flex:1;display:flex;flex-wrap:wrap;gap:2px;justify-content:flex-end;min-width:0}
+.mini{width:20px;height:20px;border-radius:50%;background:var(--ivory);display:grid;place-items:center;font:900 12px/1 var(--piece-font);opacity:.85}
+.mini.r{color:var(--red)}.mini.k{color:var(--ink)}
+.bubble{position:relative;font-size:14px;background:var(--ivory);color:var(--ink);padding:3px 10px;border-radius:10px;font-weight:700;white-space:nowrap;animation:pop .25s}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+
+.boardwrap{display:flex;justify-content:center;flex:1;align-items:center}
+.board{--w:min(calc(100vw - 32px),calc((100dvh - 260px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) / 2),440px);
+  width:var(--w);height:calc(var(--w) * 2);display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(8,1fr);
+  padding:4px;border-radius:10px;background:
+  linear-gradient(var(--felt-line),var(--felt-line)) 50% 50%/100% 1px no-repeat,
+  rgba(0,0,0,.18);border:2px solid rgba(217,178,95,.35);box-shadow:inset 0 0 30px rgba(0,0,0,.35);position:relative}
+.cell{position:relative;display:grid;place-items:center;border:1px dashed var(--felt-line);margin:1px;border-radius:6px;perspective:400px}
+.cell.last{background:rgba(217,178,95,.14)}
+.cell.from::after{content:"";width:22%;height:22%;border-radius:50%;border:2px solid rgba(217,178,95,.6)}
+.cell .mark{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3}
+.cell.can-move .mark::before{content:"";width:24%;height:24%;border-radius:50%;background:var(--brass);opacity:.85}
+.cell.can-cap .mark::before{content:"";width:88%;aspect-ratio:1;border-radius:50%;border:3px solid var(--danger);box-shadow:0 0 12px var(--danger)}
+
+.disc{--size:86%;width:var(--size);aspect-ratio:1;border-radius:50%;position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.cell .disc{width:min(86%,calc(var(--w) / 4 * .86))}
+.disc .f,.disc .b{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
+.disc .f{background:radial-gradient(circle at 35% 30%,#fbf5e2,var(--ivory) 55%,#d8cba5);
+  box-shadow:inset 0 0 0 2px var(--ivory-edge),inset 0 0 0 5px var(--ivory),inset 0 0 0 6.5px currentColor,0 3px 0 #9d8f68,0 5px 8px rgba(0,0,0,.45);
+  font:900 calc(var(--w) / 4 * .44)/1 var(--piece-font);transform:rotateY(180deg)}
+.brand .disc .f{font-size:38px}
+.disc.r .f{color:var(--red)}.disc.k .f{color:var(--ink)}
+.disc .b{background:repeating-linear-gradient(45deg,#6b4a2b 0 3px,#5a3d22 3px 6px);box-shadow:inset 0 0 0 3px #8a6438,inset 0 0 0 6px #4a3119,0 3px 0 #2e1f10,0 5px 8px rgba(0,0,0,.45)}
+.disc .b::after{content:"";width:34%;height:34%;border-radius:50%;border:2px solid rgba(217,178,95,.45)}
+.disc.up{transform:rotateY(180deg)}
+.disc.sel{transform:rotateY(180deg) translateY(-6%) scale(1.08)}
+.disc.sel .f{box-shadow:inset 0 0 0 2px var(--ivory-edge),inset 0 0 0 5px var(--ivory),inset 0 0 0 6.5px currentColor,0 0 0 3px var(--brass),0 8px 14px rgba(0,0,0,.5)}
+.disc.land{animation:land .3s}
+@keyframes land{0%{scale:1.2}100%{scale:1}}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.emotes{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.emotes button{flex:0 0 auto;padding:6px 11px;border-radius:99px;background:rgba(0,0,0,.25);font-size:14px;border:1px solid var(--felt-line)}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(10,20,15,.92);border:1px solid var(--felt-line);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:calc(100vw - 32px);text-align:center}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:10;padding:16px}
+.sheet .card{background:var(--felt-2);max-width:360px;width:100%;text-align:center;align-items:stretch}
+.sheet .big{font:900 34px/1.2 var(--piece-font);margin:4px 0}
+.sheet .card p{margin:0;color:var(--muted)}
+.share-code{font:800 44px/1 var(--ui-font);letter-spacing:.25em;font-variant-numeric:tabular-nums;color:var(--brass);padding-left:.25em}
+@media (prefers-reduced-motion:reduce){.disc,.disc.land,.bubble{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Lobby -->
+  <section class="lobby" id="lobby">
+    <div class="brand">
+      <div class="disc up r"><div class="b"></div><div class="f">帥</div></div>
+      <div><h1>兄妹暗棋</h1><p>兩支手機，隔再遠也能一起翻棋</p></div>
+    </div>
+
+    <div class="card">
+      <label for="nameIn">你的暱稱</label>
+      <input id="nameIn" maxlength="10" placeholder="例如：哥哥" autocomplete="off">
+    </div>
+
+    <div class="card">
+      <h2>開房間</h2>
+      <button class="btn" id="hostBtn">開新房間，把房號傳給對方</button>
+    </div>
+
+    <div class="card">
+      <h2>加入房間</h2>
+      <input id="codeIn" class="code" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
+      <button class="btn" id="joinBtn">加入</button>
+    </div>
+
+    <p class="err" id="lobbyErr"></p>
+
+    <div class="row">
+      <button class="btn ghost small" id="localBtn">同一支手機輪流下</button>
+    </div>
+
+    <details class="rules">
+      <summary>暗棋規則（台灣玩法）</summary>
+      <ol>
+        <li>32 顆棋全部蓋著。輪到你時，可以翻一顆棋，或走一顆自己已翻開的棋。</li>
+        <li>第一個翻棋的人，翻到什麼顏色就是那一方。</li>
+        <li>每次只能上下左右走一格。大吃小、同級可互吃：帥將 &gt; 仕士 &gt; 相象 &gt; 俥車 &gt; 傌馬 &gt; 炮包 &gt; 兵卒。</li>
+        <li>例外：兵卒可以吃帥將，帥將不能吃兵卒。</li>
+        <li>炮包吃子要隔一顆棋（蓋著的也算）跳過去吃，距離不限，什麼都能吃；平常走路一樣只走一格。</li>
+        <li>只能吃已翻開的棋。對方被吃光或沒棋可動就輸了。連續 50 步沒有翻棋或吃子算和棋。</li>
+      </ol>
+    </details>
+  </section>
+
+  <!-- Game -->
+  <section class="game" id="game" hidden>
+    <div class="topline">
+      <span class="pill"><span class="dot" id="netDot"></span><span id="netText">連線中</span></span>
+      <span class="pill" id="roomPill">房號 <span class="room" id="roomCode"></span></span>
+      <button class="pill" id="menuBtn" aria-label="選單">⋯ 選單</button>
+    </div>
+
+    <div class="player" id="oppBar">
+      <div class="who"><span class="name" id="oppName">對手</span><span class="side" id="oppSide">尚未翻棋</span></div>
+      <span id="oppBubble"></span>
+      <div class="caps" id="oppCaps" aria-label="對手吃掉的棋"></div>
+    </div>
+
+    <div class="boardwrap"><div class="board" id="board"></div></div>
+
+    <div class="player" id="meBar">
+      <div class="who"><span class="name" id="meName">我</span><span class="side" id="meSide">尚未翻棋</span></div>
+      <span id="meBubble"></span>
+      <div class="caps" id="meCaps" aria-label="我吃掉的棋"></div>
+    </div>
+
+    <div class="emotes" id="emotes"></div>
+  </section>
+</div>
+
+<!-- sheets -->
+<div class="sheet" id="waitSheet" hidden>
+  <div class="card">
+    <h2>等對方進來</h2>
+    <div class="share-code" id="waitCode">----</div>
+    <p>把房號或連結傳給對方，對方打開後輸入就能開始。</p>
+    <button class="btn" id="shareBtn">分享連結</button>
+    <button class="btn ghost small" id="cancelWait">取消</button>
+  </div>
+</div>
+
+<div class="sheet" id="menuSheet" hidden>
+  <div class="card">
+    <h2>選單</h2>
+    <button class="btn ghost" id="drawBtn">提議和棋</button>
+    <button class="btn ghost" id="resignBtn">認輸</button>
+    <button class="btn ghost" id="soundBtn">音效：開</button>
+    <button class="btn ghost" id="leaveBtn">離開房間</button>
+    <button class="btn" id="closeMenu">回到棋盤</button>
+  </div>
+</div>
+
+<div class="sheet" id="confirmSheet" hidden>
+  <div class="card">
+    <div class="big" id="confirmTitle"></div>
+    <p id="confirmText"></p>
+    <div class="row"><button class="btn ghost" id="confirmNo">取消</button><button class="btn" id="confirmYes">確定</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="endSheet" hidden>
+  <div class="card">
+    <div class="big" id="endTitle"></div>
+    <p id="endText"></p>
+    <button class="btn" id="againBtn">再來一局</button>
+    <button class="btn ghost small" id="viewBoard">看一下棋盤</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(() => {
+'use strict';
+const PREFIX = 'dqj-anqi-v1-';
+const TYPES = { K:{rank:7,r:'帥',k:'將'}, A:{rank:6,r:'仕',k:'士'}, E:{rank:5,r:'相',k:'象'},
+  R:{rank:4,r:'俥',k:'車'}, N:{rank:3,r:'傌',k:'馬'}, C:{rank:2,r:'炮',k:'包'}, P:{rank:1,r:'兵',k:'卒'} };
+const COUNTS = {K:1,A:2,E:2,R:2,N:2,C:2,P:5};
+const EMOTES = ['好棋！','哈哈','快一點啦','等我一下','我要吃你了','失誤了…','再一局！'];
+const COLOR_NAME = { r:'紅方', k:'黑方' };
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* ================= rules ================= */
+function newGame(names, starter){
+  const pieces = [];
+  for (const side of ['r','k']) for (const t in COUNTS) for (let i=0;i<COUNTS[t];i++) pieces.push({t, side, up:false});
+  for (let i=pieces.length-1;i>0;i--){ const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i+1); [pieces[i],pieces[j]]=[pieces[j],pieces[i]]; }
+  return { id: Date.now() + '-' + Math.random().toString(36).slice(2,7), seq:0, board:pieces,
+    turn:starter, starter, colorOf:{A:null,B:null}, captured:{r:[],k:[]}, last:null, idle:0, winner:null, reason:'', names };
+}
+const other = p => p==='A' ? 'B' : 'A';
+const rc = i => [i>>2, i&3];
+const inb = (r,c) => r>=0 && r<8 && c>=0 && c<4;
+const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+
+function canEat(a, d){
+  if (a.t==='K' && d.t==='P') return false;
+  if (a.t==='P' && d.t==='K') return true;
+  return TYPES[a.t].rank >= TYPES[d.t].rank;
+}
+function targets(b, i){ // [{to, cap}]
+  const p = b[i], out = [], [r,c] = rc(i);
+  for (const [dr,dc] of DIRS){
+    const nr=r+dr, nc=c+dc; if (!inb(nr,nc)) continue;
+    const q = b[nr*4+nc];
+    if (!q) out.push({to:nr*4+nc, cap:false});
+    else if (p.t!=='C' && q.up && q.side!==p.side && canEat(p,q)) out.push({to:nr*4+nc, cap:true});
+  }
+  if (p.t==='C'){
+    for (const [dr,dc] of DIRS){
+      let nr=r+dr, nc=c+dc, screen=false;
+      while (inb(nr,nc)){
+        const q = b[nr*4+nc];
+        if (q){ if (!screen) screen=true; else { if (q.up && q.side!==p.side) out.push({to:nr*4+nc, cap:true}); break; } }
+        nr+=dr; nc+=dc;
+      }
+    }
+  }
+  return out;
+}
+function hasAction(s, who){
+  if (s.board.some(p => p && !p.up)) return true;
+  const col = s.colorOf[who]; if (!col) return false;
+  return s.board.some((p,i) => p && p.up && p.side===col && targets(s.board,i).length);
+}
+function apply(s, act){ // mutates a copy; returns new state
+  s = JSON.parse(JSON.stringify(s));
+  const me = s.turn, b = s.board;
+  if (act.type==='flip'){
+    b[act.i].up = true;
+    if (!s.colorOf[me]){ s.colorOf[me] = b[act.i].side; s.colorOf[other(me)] = b[act.i].side==='r'?'k':'r'; }
+    s.idle = 0; s.last = {type:'flip', to:act.i};
+  } else {
+    const cap = b[act.to];
+    if (cap){ s.captured[cap.side].push(cap.t); s.idle = 0; } else s.idle++;
+    b[act.to] = b[act.from]; b[act.from] = null;
+    s.last = {type: cap?'cap':'move', from:act.from, to:act.to};
+  }
+  s.seq++; s.turn = other(me);
+  const nx = s.turn, ncol = s.colorOf[nx];
+  if (ncol && s.captured[ncol].length===16){ s.winner = me; s.reason = '棋子全被吃光'; }
+  else if (!hasAction(s, nx)){ s.winner = me; s.reason = '沒有棋可以動'; }
+  else if (s.idle >= 50){ s.winner = 'draw'; s.reason = '連續 50 步沒有翻棋或吃子'; }
+  return s;
+}
+
+/* ================= app state ================= */
+let mode = null;        // 'host' | 'guest' | 'local'
+let me = 'A';           // which seat this phone plays (local: follows turn)
+let code = '';
+let S = null;           // game state
+let sel = -1;
+let peer = null, conn = null, netState = 'off', retryTimer = null;
+let soundOn = store.get('anqi:sound') !== false;
+let endDismissedFor = null;
+let pendingConfirm = null;
+
+const myName = () => ($('nameIn').value.trim() || (mode==='guest' ? '妹妹' : '哥哥'));
+const mySeat = () => mode==='local' ? S.turn : me;
+
+function save(){ if (mode) store.set('anqi:session', {mode, me, code, state:S, name:myName()}); }
+
+/* ================= render ================= */
+const boardEl = $('board');
+const cells = [];
+for (let i=0;i<32;i++){
+  const c = document.createElement('button');
+  c.className = 'cell'; c.dataset.i = i; c.setAttribute('aria-label', '格子 '+(i+1));
+  c.innerHTML = '<div class="disc"><div class="b"></div><div class="f"></div></div><span class="mark"></span>';
+  c.addEventListener('click', () => tap(i));
+  boardEl.appendChild(c); cells.push(c);
+}
+let prevBoard = null;
+
+function render(){
+  if (!S) return;
+  const seat = mySeat(), opp = other(seat), b = S.board;
+  const tg = sel>=0 && b[sel] ? targets(b, sel) : [];
+  for (let i=0;i<32;i++){
+    const c = cells[i], p = b[i], d = c.firstChild;
+    c.classList.toggle('last', !!S.last && S.last.to===i);
+    c.classList.toggle('from', !!S.last && S.last.from===i && !p);
+    const t = tg.find(x => x.to===i);
+    c.classList.toggle('can-move', !!t && !t.cap);
+    c.classList.toggle('can-cap', !!t && t.cap);
+    d.hidden = !p;
+    if (p){
+      d.className = 'disc ' + (p.up ? 'up ' + p.side : '') + (sel===i ? ' sel' : '');
+      d.lastChild.textContent = TYPES[p.t][p.side];
+      const was = prevBoard && prevBoard[i];
+      if (prevBoard && S.last && S.last.to===i && S.last.type!=='flip' && (!was || was.t!==p.t || was.side!==p.side)){
+        void d.offsetWidth; d.classList.add('land');
+      }
+      c.setAttribute('aria-label', p.up ? COLOR_NAME[p.side]+TYPES[p.t][p.side] : '蓋著的棋');
+    } else c.setAttribute('aria-label', '空格');
+  }
+  prevBoard = JSON.parse(JSON.stringify(b));
+
+  const names = S.names || {};
+  const label = s => mode==='local' ? (names[s] || (s==='A'?'玩家一':'玩家二')) : (names[s] || (s===me ? myName() : '對手'));
+  $('meName').textContent = label(seat) + (mode==='local' ? '' : '（我）');
+  $('oppName').textContent = label(opp);
+  const sideText = s => {
+    const col = S.colorOf[s];
+    if (!col) return '尚未翻棋';
+    return `<b class="${col}">${COLOR_NAME[col]}</b> · 剩 ${16 - S.captured[col].length} 顆`;
+  };
+  $('meSide').innerHTML = sideText(seat);
+  $('oppSide').innerHTML = sideText(opp);
+  const capsHtml = s => { // pieces that seat s has eaten = captured of opponent color
+    const col = S.colorOf[other(s)]; if (!col) return '';
+    return S.captured[col].slice().sort((x,y)=>TYPES[y].rank-TYPES[x].rank)
+      .map(t => `<span class="mini ${col}">${TYPES[t][col]}</span>`).join('');
+  };
+  $('meCaps').innerHTML = capsHtml(seat);
+  $('oppCaps').innerHTML = capsHtml(opp);
+  $('meBar').classList.toggle('active', !S.winner && S.turn===seat);
+  $('oppBar').classList.toggle('active', !S.winner && S.turn===opp);
+
+  // end
+  if (S.winner && endDismissedFor !== S.id){
+    let title, text = S.reason;
+    if (S.winner==='draw') title = '和棋';
+    else if (mode==='local') title = label(S.winner) + ' 勝';
+    else title = S.winner===me ? '你贏了！' : '你輸了';
+    $('endTitle').textContent = title; $('endText').textContent = text;
+    $('endSheet').hidden = false;
+  } else if (!S.winner) $('endSheet').hidden = true;
+}
+
+function renderNet(){
+  const dot = $('netDot'), t = $('netText');
+  dot.className = 'dot';
+  if (mode==='local'){ dot.classList.add('ok'); t.textContent = '同機對戰'; $('roomPill').hidden = true; return; }
+  $('roomPill').hidden = false; $('roomCode').textContent = code;
+  if (netState==='open'){ dot.classList.add('ok'); t.textContent = '已連線'; }
+  else if (netState==='wait'){ dot.classList.add('wait'); t.textContent = mode==='host' ? '等待對方' : '連線中'; }
+  else { dot.classList.add('bad'); t.textContent = '斷線，重連中'; }
+}
+
+let toastT;
+function toast(msg, ms=2200){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, ms); }
+
+function bubble(seatWho, text){
+  const el = seatWho===mySeat() ? $('meBubble') : $('oppBubble');
+  el.innerHTML = ''; const s = document.createElement('span'); s.className='bubble'; s.textContent = text; el.appendChild(s);
+  clearTimeout(el._t); el._t = setTimeout(()=>{ el.innerHTML=''; }, 3500);
+}
+
+/* ================= sound ================= */
+let ac = null;
+function beep(kind){
+  if (!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state==='suspended') ac.resume();
+    const o = ac.createOscillator(), g = ac.createGain(), now = ac.currentTime;
+    const f = {flip:520, move:380, cap:220, turn:660, msg:880}[kind] || 440;
+    o.type = kind==='cap' ? 'square' : 'triangle'; o.frequency.setValueAtTime(f, now);
+    if (kind==='cap') o.frequency.exponentialRampToValueAtTime(110, now+.15);
+    g.gain.setValueAtTime(.18, now); g.gain.exponentialRampToValueAtTime(.001, now + .18);
+    o.connect(g).connect(ac.destination); o.start(now); o.stop(now+.2);
+  }catch(e){}
+}
+
+/* ================= input ================= */
+function tap(i){
+  if (!S || S.winner) return;
+  const seat = mySeat();
+  if (S.turn !== seat){ toast('還沒輪到你喔'); return; }
+  if (mode!=='local' && netState!=='open'){ toast('對方還沒連上，等一下再下'); return; }
+  const b = S.board, p = b[i];
+  if (sel >= 0){
+    const t = targets(b, sel).find(x => x.to===i);
+    if (t){ act({type:'move', from:sel, to:i}); return; }
+    if (p && p.up && p.side===S.colorOf[seat] && i!==sel){ sel = i; render(); return; }
+    sel = -1; render(); return;
+  }
+  if (!p) return;
+  if (!p.up){ act({type:'flip', i}); return; }
+  if (p.side !== S.colorOf[seat]){ toast('那是對方的棋'); return; }
+  if (!targets(b,i).length){ toast('這顆現在動不了'); }
+  sel = i; render();
+}
+
+function act(a){
+  sel = -1;
+  S = apply(S, a);
+  beep(S.last.type==='flip' ? 'flip' : S.last.type);
+  save(); render(); send({type:'state', state:S});
+}
+
+/* ================= network ================= */
+function send(msg){ if (conn && conn.open){ try{ conn.send(msg); }catch(e){} } }
+
+function newer(a, b){ // is state a newer than b?
+  if (!b) return true;
+  const ta = parseInt(a.id), tb = parseInt(b.id);
+  if (a.id !== b.id) return ta > tb;
+  return a.seq > b.seq;
+}
+
+function onData(msg){
+  if (!msg || typeof msg !== 'object') return;
+  if (msg.type==='hello'){
+    if (mode==='host'){
+      S.names = Object.assign({}, S.names, {B: String(msg.name||'').slice(0,10) || '妹妹', A: myName()});
+      save(); render();
+      send({type:'state', state:S});
+      $('waitSheet').hidden = true;
+      toast((S.names.B) + ' 進來了！');
+      beep('msg');
+    }
+  } else if (msg.type==='state' && msg.state && Array.isArray(msg.state.board) && msg.state.board.length===32){
+    if (newer(msg.state, S)){
+      const was = S;
+      const turnBefore = was && was.turn;
+      S = msg.state;
+      if (!was || was.id !== S.id){ sel = -1; prevBoard = null; }
+      if (S.last && was && was.id===S.id && S.seq===was.seq+1) beep(S.last.type==='flip'?'flip':S.last.type);
+      if (S.turn===me && turnBefore!==me && !S.winner) setTimeout(()=>beep('turn'), 220);
+      if (mode==='host' && S.names) S.names.A = myName();
+      save(); render();
+    } else if (newer(S, msg.state)) {
+      send({type:'state', state:S});
+    }
+    $('waitSheet').hidden = true;
+  } else if (msg.type==='emote'){
+    bubble(other(me), String(msg.text).slice(0,20)); beep('msg');
+  } else if (msg.type==='draw-offer'){
+    confirmBox('對方提議和棋', '要接受嗎？', '接受', () => {
+      S = JSON.parse(JSON.stringify(S)); S.winner='draw'; S.reason='雙方同意和棋'; S.seq++;
+      save(); render(); send({type:'state', state:S});
+    }, () => send({type:'draw-no'}));
+  } else if (msg.type==='draw-no'){
+    toast('對方不同意和棋');
+  }
+}
+
+function wireConn(c){
+  conn = c;
+  c.on('open', () => {
+    netState = 'open'; renderNet();
+    if (mode==='guest') c.send({type:'hello', name:myName()});
+    if (mode==='host') c.send({type:'state', state:S});
+  });
+  c.on('data', onData);
+  c.on('close', () => { if (conn===c){ netState = mode==='host' ? 'wait' : 'bad'; renderNet(); if (mode==='guest') scheduleRetry(); } });
+  c.on('error', () => {});
+}
+
+function scheduleRetry(){
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(() => { if (mode==='guest' && !(conn && conn.open)) connectGuest(); }, 2500);
+}
+
+function startHost(isResume){
+  destroyPeer();
+  netState = 'wait'; renderNet();
+  peer = new Peer(PREFIX + code, {debug:0});
+  let tries = 0;
+  peer.on('open', () => { netState = conn && conn.open ? 'open' : 'wait'; renderNet(); });
+  peer.on('connection', c => {
+    if (conn && conn.open && conn !== c){ try{ conn.close(); }catch(e){} }
+    wireConn(c);
+  });
+  peer.on('disconnected', () => { try{ peer.reconnect(); }catch(e){} });
+  peer.on('error', err => {
+    if (err.type==='unavailable-id'){
+      if (isResume && tries++ < 20){ netState='bad'; renderNet(); setTimeout(()=>{ if(mode==='host') startHost(true); }, 3000); return; }
+      code = randCode(); $('waitCode').textContent = code; save(); startHost(false);
+    } else if (err.type==='network' || err.type==='server-error' || err.type==='socket-error'){
+      netState='bad'; renderNet(); setTimeout(()=>{ if(mode==='host') startHost(true); }, 4000);
+    }
+  });
+}
+
+function connectGuest(){
+  if (!peer || peer.destroyed){
+    peer = new Peer({debug:0});
+    peer.on('open', () => doConnect());
+    peer.on('disconnected', () => { try{ peer.reconnect(); }catch(e){} });
+    peer.on('error', err => {
+      if (err.type==='peer-unavailable'){
+        netState='bad'; renderNet();
+        if (!S){ lobbyError('找不到房號 '+code+'，請確認對方已經開好房間'); leave(true); return; }
+        scheduleRetry();
+      } else { netState='bad'; renderNet(); scheduleRetry(); }
+    });
+  } else if (peer.open) doConnect();
+  else if (peer.disconnected) { try{ peer.reconnect(); }catch(e){} }
+}
+function doConnect(){
+  netState = 'wait'; renderNet();
+  const c = peer.connect(PREFIX + code, {reliable:true});
+  wireConn(c);
+  setTimeout(() => { if (conn===c && !c.open){ try{ c.close(); }catch(e){} netState='bad'; renderNet(); scheduleRetry(); } }, 9000);
+}
+
+function destroyPeer(){
+  clearTimeout(retryTimer);
+  if (conn){ try{ conn.close(); }catch(e){} conn=null; }
+  if (peer){ try{ peer.destroy(); }catch(e){} peer=null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState!=='visible' || !mode || mode==='local') return;
+  if (peer && peer.disconnected && !peer.destroyed){ try{ peer.reconnect(); }catch(e){} }
+  if (mode==='guest' && !(conn && conn.open)) { destroyPeer(); connectGuest(); }
+  if (mode==='host' && (!peer || peer.destroyed)) startHost(true);
+});
+
+/* ================= flow ================= */
+const randCode = () => String(1000 + crypto.getRandomValues(new Uint32Array(1))[0] % 9000);
+function lobbyError(m){ $('lobbyErr').textContent = m; }
+function showGame(){ $('lobby').hidden = true; $('game').hidden = false; render(); renderNet(); }
+
+function needPeer(){
+  if (typeof Peer === 'undefined'){ lobbyError('連線元件載入失敗，請確認網路後重新整理頁面'); return false; }
+  return true;
+}
+
+$('hostBtn').onclick = () => {
+  if (!needPeer()) return;
+  store.set('anqi:name', $('nameIn').value.trim());
+  mode='host'; me='A'; code = randCode(); endDismissedFor = null;
+  S = newGame({A:myName(), B:''}, 'A');
+  save(); showGame();
+  $('waitCode').textContent = code; $('waitSheet').hidden = false;
+  startHost(false);
+};
+$('joinBtn').onclick = () => {
+  const c = $('codeIn').value.replace(/\D/g,'');
+  if (c.length!==4){ lobbyError('請輸入 4 位數房號'); return; }
+  if (!needPeer()) return;
+  store.set('anqi:name', $('nameIn').value.trim());
+  lobbyError('');
+  mode='guest'; me='B'; code=c; S=null; endDismissedFor = null;
+  $('lobby').hidden = true; $('game').hidden = false; renderNet();
+  toast('正在連到房間 '+code+'…', 4000);
+  connectGuest();
+};
+$('localBtn').onclick = () => {
+  destroyPeer();
+  mode='local'; me='A'; code=''; endDismissedFor = null;
+  S = newGame({A:'玩家一', B:'玩家二'}, 'A');
+  save(); showGame();
+};
+
+$('shareBtn').onclick = async () => {
+  const url = location.origin + location.pathname + '?room=' + code;
+  const text = `來跟我下暗棋！房號 ${code}\n${url}`;
+  if (navigator.share){ try{ await navigator.share({title:'兄妹暗棋', text, url}); return; }catch(e){ if (e.name==='AbortError') return; } }
+  try{ await navigator.clipboard.writeText(text); toast('已複製房號和連結，貼給對方吧'); }
+  catch(e){ toast('房號是 '+code+'，直接告訴對方就好', 3500); }
+};
+$('cancelWait').onclick = () => leave();
+
+function leave(keepLobbyErr){
+  destroyPeer(); mode=null; S=null; sel=-1; prevBoard=null; netState='off';
+  store.del('anqi:session');
+  ['waitSheet','menuSheet','endSheet','confirmSheet'].forEach(id => $(id).hidden = true);
+  $('game').hidden = true; $('lobby').hidden = false;
+  if (!keepLobbyErr) lobbyError('');
+  history.replaceState(null, '', location.pathname);
+}
+
+$('menuBtn').onclick = () => { $('drawBtn').hidden = mode==='local'; $('menuSheet').hidden = false; };
+$('closeMenu').onclick = () => $('menuSheet').hidden = true;
+$('soundBtn').onclick = () => { soundOn=!soundOn; store.set('anqi:sound', soundOn); $('soundBtn').textContent = '音效：'+(soundOn?'開':'關'); if (soundOn) beep('msg'); };
+$('soundBtn').textContent = '音效：'+(soundOn?'開':'關');
+$('leaveBtn').onclick = () => { $('menuSheet').hidden = true; confirmBox('離開房間？', '這一局會結束，要再玩就重新開房。', '離開', () => leave()); };
+$('resignBtn').onclick = () => {
+  $('menuSheet').hidden = true;
+  if (!S || S.winner) return;
+  confirmBox('確定認輸？', '這一局會直接結束。', '認輸', () => {
+    const loser = mySeat();
+    S = JSON.parse(JSON.stringify(S)); S.winner = other(loser); S.reason = (mode==='local' ? '有人' : (S.names[loser]||'對方')) + '認輸了'; S.seq++;
+    save(); render(); send({type:'state', state:S});
+  });
+};
+$('drawBtn').onclick = () => {
+  $('menuSheet').hidden = true;
+  if (!S || S.winner) return;
+  if (netState!=='open'){ toast('對方不在線上'); return; }
+  send({type:'draw-offer'}); toast('已經問對方要不要和棋');
+};
+
+function confirmBox(title, text, yesText, onYes, onNo){
+  $('confirmTitle').textContent = title; $('confirmText').textContent = text; $('confirmYes').textContent = yesText;
+  pendingConfirm = {onYes, onNo}; $('confirmSheet').hidden = false;
+}
+$('confirmYes').onclick = () => { $('confirmSheet').hidden = true; const p = pendingConfirm; pendingConfirm=null; p && p.onYes && p.onYes(); };
+$('confirmNo').onclick = () => { $('confirmSheet').hidden = true; const p = pendingConfirm; pendingConfirm=null; p && p.onNo && p.onNo(); };
+
+$('againBtn').onclick = () => {
+  if (mode!=='local' && netState!=='open'){ toast('對方不在線上，等連上再開新局'); return; }
+  const starter = other(S.starter || 'A');
+  const names = Object.assign({}, S.names);
+  S = newGame(names, starter); sel=-1; prevBoard=null;
+  $('endSheet').hidden = true;
+  save(); render(); send({type:'state', state:S});
+  toast((mode==='local' ? (names[starter]||'') : (starter===me ? '你' : (names[starter]||'對方'))) + '先翻棋');
+};
+$('viewBoard').onclick = () => { endDismissedFor = S.id; $('endSheet').hidden = true; };
+
+const emEl = $('emotes');
+for (const e of EMOTES){
+  const b = document.createElement('button'); b.textContent = e;
+  b.onclick = () => {
+    if (mode==='local'){ bubble(S.turn, e); return; }
+    bubble(me, e); send({type:'emote', text:e});
+  };
+  emEl.appendChild(b);
+}
+
+/* ================= boot ================= */
+$('nameIn').value = store.get('anqi:name') || '';
+const qRoom = new URLSearchParams(location.search).get('room');
+const sess = store.get('anqi:session');
+if (sess && sess.mode && sess.state && !(qRoom && sess.code !== qRoom)){
+  mode = sess.mode; me = sess.me; code = sess.code || ''; S = sess.state;
+  if (!$('nameIn').value) $('nameIn').value = sess.name || '';
+  showGame();
+  if (mode==='host'){ if (typeof Peer!=='undefined') startHost(true); if (!S.names || !S.names.B){ $('waitCode').textContent = code; $('waitSheet').hidden = false; } }
+  else if (mode==='guest'){ if (typeof Peer!=='undefined') connectGuest(); }
+} else if (qRoom && /^\d{4}$/.test(qRoom)){
+  $('codeIn').value = qRoom;
+  lobbyError('');
+  setTimeout(() => ($('nameIn').value ? $('joinBtn') : $('nameIn')).focus(), 50);
+}
+
+// testing hook
+window.__anqi = { apply, targets, newGame, hasAction, get S(){ return S; } };
+})();
+</script>
+</body>
+</html>
