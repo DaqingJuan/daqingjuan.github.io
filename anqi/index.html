@@ -215,10 +215,10 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
       <h3>車衝馬斜炮飛山</h3>
       <ul>
         <li>車衝：俥車可以直線衝到底，經過的格子要是空的，可以吃路上碰到的第一顆棋。</li>
-        <li>馬斜：傌馬除了上下左右，也可以斜走一格、斜吃一格。</li>
+        <li>馬斜：傌馬只能斜走一格、斜吃一格，不能上下左右走。</li>
         <li>炮飛山：炮包隔一顆棋飛過去吃，距離不限。</li>
         <li>吃暗棋：可以直接攻擊蓋著的棋，被攻擊的棋會翻開。是對方的棋而且吃得下，就吃掉；是自己的棋或比自己大，就停在原地、換對方下。</li>
-        <li>連吃：每吃到一顆，同一顆棋可以繼續吃（明的暗的都行），直到翻到自己的、比自己大的、沒得吃，或你按「結束回合」。</li>
+        <li>連吃：每吃到一顆，同一顆棋可以繼續吃（明的暗的都行），直到翻到自己的、比自己大的或沒得吃。不想繼續吃，隨時可以按「結束回合」停下來。</li>
       </ul>
     </details>
   </section>
@@ -444,7 +444,7 @@ function targets(b, i, variant, capOnly){
       }
     }
   } else {
-    const dirs = (p.t === 'N' && chain) ? ORTH.concat(DIAG) : ORTH;
+    const dirs = (p.t === 'N' && chain) ? DIAG : ORTH;
     for (const [dr,dc] of dirs){
       const nr=r+dr, nc=c+dc; if (!inb(nr,nc)) continue;
       const j = nr*4+nc;
