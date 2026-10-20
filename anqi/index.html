@@ -250,7 +250,7 @@ table.rec .w{color:#9fe0a8}.rec .l{color:#ff9b8a}
       <h3>車衝馬斜炮飛山</h3>
       <ul>
         <li>車衝：俥車可以直線衝到底（經過的格子要是空的），吃路上碰到的第一顆棋。中間至少隔一個空格衝過去，什麼都能吃；緊貼著的話照一般大小規則。</li>
-        <li>馬斜：傌馬只能斜走一格、斜吃一格，不能上下左右走。</li>
+        <li>馬斜：傌馬只能斜走一格、斜吃一格，不能上下左右走。斜吃什麼都能吃。</li>
         <li>炮飛山：炮包隔一顆棋飛過去吃，距離不限。</li>
         <li>吃暗棋：可以直接攻擊蓋著的棋，被攻擊的棋會翻開。是對方的棋而且吃得下，就吃掉；是自己的棋或比自己大，就停在原地、換對方下。</li>
         <li>連吃：每吃到一顆，同一顆棋可以繼續吃（明的暗的都行），直到翻到自己的、比自己大的或沒得吃。不想繼續吃，隨時可以按「結束回合」停下來。</li>
@@ -371,7 +371,7 @@ function genFrom(b,i,side,out,capOnly){
   const nb=(t===5&&X)?NB_D[i]:NB_O[i];
   for(const j of nb){const q=b[j];
     if(!q){if(!capOnly)out.push(i*32+j);}
-    else if(t!==6){if(!(q&UP)){if(X)out.push(i*32+j);}else if(sd(q)!==side&&canEat(c,q))out.push(i*32+j);}}
+    else if(t!==6){if(!(q&UP)){if(X)out.push(i*32+j);}else if(sd(q)!==side&&((t===5&&X)||canEat(c,q)))out.push(i*32+j);}}
   if(t===6){for(const ray of RAYS[i]){let sc=false;for(const j of ray){const q=b[j];if(!q)continue;if(!sc){sc=true;continue;}
     if(!(q&UP)){if(X)out.push(i*32+j);}else if(sd(q)!==side)out.push(i*32+j);break;}}}
 }
@@ -382,7 +382,7 @@ function gen(b,side,chainAt,out,capOnly){
 function make(b,m){
   if(m>=1024){const i=m-1024;b[i]|=UP;return[1,i];}
   const f=m>>5,to=m&31,a=b[f],d=b[to];
-  if(d&&!(d&UP)){const rv=d|UP;const dist=Math.abs((f>>2)-(to>>2))+Math.abs((f&3)-(to&3));const ch=X&&(a&7)===4&&dist>1;
+  if(d&&!(d&UP)){const rv=d|UP;const dist=Math.abs((f>>2)-(to>>2))+Math.abs((f&3)-(to&3));const ch=X&&(((a&7)===4&&dist>1)||(a&7)===5);
     if(sd(rv)!==sd(a)&&(ch||canEat(a,rv))){b[to]=a;b[f]=0;return[0,f,to,a,d,1];}
     b[to]=rv;return[0,f,to,a,d,0];}
   b[to]=a;b[f]=0;return[0,f,to,a,d,d?1:0];
@@ -630,7 +630,7 @@ function targets(b, i, variant, capOnly){
       const nr=r+dr, nc=c+dc; if (!inb(nr,nc)) continue;
       const j = nr*4+nc;
       if (!b[j]) out.push({to:j, kind:'move'});
-      else if (p.t !== 'C') consider(j);
+      else if (p.t !== 'C') consider(j, p.t === 'N' && chain);   // 馬斜: diagonal capture eats anything
     }
   }
   if (p.t === 'C'){
@@ -677,7 +677,7 @@ function apply(s0, act){
   } else {
     const att = b[act.from], def = b[act.to];
     const [fr, fc] = rc(act.from), [tr, tc] = rc(act.to);
-    const charged = s.variant === 'chain' && att.t === 'R' && Math.abs(fr-tr) + Math.abs(fc-tc) > 1;
+    const charged = s.variant === 'chain' && ((att.t === 'R' && Math.abs(fr-tr) + Math.abs(fc-tc) > 1) || att.t === 'N');
     if (def && !def.up){                       // attack a face-down piece
       def.up = true; s.idle = 0;
       if (def.side !== att.side && (charged || canEat(att, def))){
