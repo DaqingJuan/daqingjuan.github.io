@@ -67,6 +67,21 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
 .modes input:checked + label{border-color:var(--brass);background:rgba(214,166,90,.16);box-shadow:inset 0 0 0 1px var(--brass)}
 .modes input:focus-visible + label{outline:2px solid var(--brass);outline-offset:2px}
 
+.levels{grid-template-columns:repeat(4,1fr);gap:6px}
+.levels label{align-items:center;padding:10px 4px}
+.levels label b{font-size:18px}
+#lvHell + label b{color:#ff8f78}
+.rechead{display:flex;justify-content:space-between;align-items:center}
+.linkbtn{font-size:13px;color:var(--muted);text-decoration:underline;padding:2px 4px}
+table.rec{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.rec th{font-size:12px;color:var(--muted);font-weight:500;text-align:right;padding:2px 4px 6px}
+table.rec th:first-child,table.rec td:first-child{text-align:left}
+table.rec td{padding:7px 4px;text-align:right;border-top:1px solid var(--panel-line)}
+table.rec td:first-child{max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.rec .w{color:#9fe0a8}.rec .l{color:#ff9b8a}
+.empty{margin:0;color:var(--muted);font-size:13px}
+.endrec{font-size:14px;font-variant-numeric:tabular-nums}
+.thinking{color:var(--brass);font-style:normal;animation:blink 1.2s infinite}
 .rules{color:var(--muted);font-size:13px;line-height:1.75}
 .rules summary{cursor:pointer;color:var(--text);font-size:14px}
 .rules h3{margin:12px 0 2px;font-size:13px;color:var(--text)}
@@ -182,6 +197,21 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
     </div>
 
     <div class="card">
+      <h2>跟電腦下</h2>
+      <div class="modes levels" role="radiogroup" aria-label="電腦難度">
+        <input type="radio" name="level" id="lvEasy" value="easy">
+        <label for="lvEasy"><b>簡單</b></label>
+        <input type="radio" name="level" id="lvMedium" value="medium" checked>
+        <label for="lvMedium"><b>中度</b></label>
+        <input type="radio" name="level" id="lvHard" value="hard">
+        <label for="lvHard"><b>困難</b></label>
+        <input type="radio" name="level" id="lvHell" value="hell">
+        <label for="lvHell"><b>地獄</b></label>
+      </div>
+      <button class="btn" id="aiBtn">開始跟電腦下</button>
+    </div>
+
+    <div class="card">
       <h2>開房間</h2>
       <button class="btn" id="hostBtn">開新房間，把房號傳給對方</button>
     </div>
@@ -193,6 +223,11 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
     </div>
 
     <p class="err" id="lobbyErr"></p>
+
+    <div class="card">
+      <div class="rechead"><h2>戰績</h2><button class="linkbtn" id="clearRec">清除</button></div>
+      <div id="recList"></div>
+    </div>
 
     <div class="row">
       <button class="btn ghost small" id="localBtn">同一支手機輪流下</button>
@@ -297,6 +332,7 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
   <div class="card">
     <div class="big" id="endTitle"></div>
     <p id="endText"></p>
+    <p class="endrec" id="endRec"></p>
     <div class="modes" role="radiogroup" aria-label="下一局玩法">
       <input type="radio" name="variant2" id="eClassic" value="classic">
       <label for="eClassic"><b>傳統暗棋</b></label>
@@ -311,6 +347,150 @@ input.code{font-size:26px;letter-spacing:.4em;text-align:center;font-variant-num
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script type="text/plain" id="aiEngine">
+// ===== 暗棋 AI engine: determinized (sampled hidden pieces) alpha-beta search. Never reads face-down identities. =====
+const IDX={K:1,A:2,E:3,R:4,N:5,C:6,P:7};
+const RANK=[0,7,6,5,4,3,2,1];
+const UP=16, END=2048, WIN=10000, INF=1e9;
+const VAL_C=[0,90,60,40,30,20,45,12], VAL_X=[0,90,60,40,62,24,50,12];
+const COUNTS=[0,1,2,2,2,2,2,5];
+const NB_O=[],NB_D=[],RAYS=[];
+for(let i=0;i<32;i++){const r=i>>2,c=i&3;NB_O[i]=[];NB_D[i]=[];RAYS[i]=[];
+  for(const[dr,dc]of[[1,0],[-1,0],[0,1],[0,-1]]){
+    if(r+dr>=0&&r+dr<8&&c+dc>=0&&c+dc<4)NB_O[i].push((r+dr)*4+c+dc);
+    const ray=[];let nr=r+dr,nc=c+dc;while(nr>=0&&nr<8&&nc>=0&&nc<4){ray.push(nr*4+nc);nr+=dr;nc+=dc;}RAYS[i].push(ray);}
+  for(const[dr,dc]of[[1,1],[1,-1],[-1,1],[-1,-1]])if(r+dr>=0&&r+dr<8&&c+dc>=0&&c+dc<4)NB_D[i].push((r+dr)*4+c+dc);}
+const sd=c=>(c>>3)&1;
+function canEat(a,d){const ta=a&7,td=d&7;if(ta===6)return true;if(ta===1&&td===7)return false;if(ta===7&&td===1)return true;return RANK[ta]>=RANK[td];}
+let X=false,P=null,VAL=VAL_C,H=[],DL=0,nodes=0,aborted=false;
+function genFrom(b,i,side,out,capOnly){
+  const c=b[i],t=c&7;
+  if(t===4&&X){for(const ray of RAYS[i]){for(let k=0;k<ray.length;k++){const j=ray[k],q=b[j];
+    if(!q){if(!capOnly)out.push(i*32+j);continue;}
+    if(!(q&UP))out.push(i*32+j);else if(sd(q)!==side&&(k>0||canEat(c,q)))out.push(i*32+j);break;}}return;}
+  const nb=(t===5&&X)?NB_D[i]:NB_O[i];
+  for(const j of nb){const q=b[j];
+    if(!q){if(!capOnly)out.push(i*32+j);}
+    else if(t!==6){if(!(q&UP)){if(X)out.push(i*32+j);}else if(sd(q)!==side&&canEat(c,q))out.push(i*32+j);}}
+  if(t===6){for(const ray of RAYS[i]){let sc=false;for(const j of ray){const q=b[j];if(!q)continue;if(!sc){sc=true;continue;}
+    if(!(q&UP)){if(X)out.push(i*32+j);}else if(sd(q)!==side)out.push(i*32+j);break;}}}
+}
+function gen(b,side,chainAt,out,capOnly){
+  if(chainAt>=0){genFrom(b,chainAt,side,out,true);return;}
+  for(let i=0;i<32;i++){const c=b[i];if(c&&(c&UP)&&sd(c)===side)genFrom(b,i,side,out,capOnly);}
+}
+function make(b,m){
+  if(m>=1024){const i=m-1024;b[i]|=UP;return[1,i];}
+  const f=m>>5,to=m&31,a=b[f],d=b[to];
+  if(d&&!(d&UP)){const rv=d|UP;const dist=Math.abs((f>>2)-(to>>2))+Math.abs((f&3)-(to&3));const ch=X&&(a&7)===4&&dist>1;
+    if(sd(rv)!==sd(a)&&(ch||canEat(a,rv))){b[to]=a;b[f]=0;return[0,f,to,a,d,1];}
+    b[to]=rv;return[0,f,to,a,d,0];}
+  b[to]=a;b[f]=0;return[0,f,to,a,d,d?1:0];
+}
+function unmake(b,u){if(u[0]===1){b[u[1]]&=~UP;return;}b[u[1]]=u[3];b[u[2]]=u[4];}
+function hasPieces(b,side){for(let i=0;i<32;i++){const c=b[i];if(c&&sd(c)===side)return true;}return false;}
+function canChain(b,at,side){const t=[];genFrom(b,at,side,t,true);return t.length>0;}
+function evaluate(b,side){
+  let k0=0,k1=0,p0=0,p1=0;
+  for(let i=0;i<32;i++){const c=b[i];if(!c)continue;const t=c&7;if(t===1){if(sd(c))k1++;else k0++;}else if(t===7){if(sd(c))p1++;else p0++;}}
+  let s=0;
+  for(let i=0;i<32;i++){const c=b[i];if(!c)continue;const t=c&7,o=sd(c);let v=VAL[t];
+    if(t===7&&(o?k0:k1))v+=10;if(t===1)v-=5*(o?p0:p1);if(!(c&UP))v*=.85;s+=o===side?v:-v;}
+  // chase: reward standing close to an enemy piece you could eat (finishes won endgames instead of drifting)
+  let ups=0;const U=CH;for(let i=0;i<32;i++){const c=b[i];if(c&&(c&UP))U[ups++]=i;}
+  for(let x=0;x<ups;x++){const i=U[x],c=b[i],t=c&7;if(t===6)continue;let best=99;
+    for(let y=0;y<ups;y++){const j=U[y],q=b[j];if(sd(q)===sd(c)||!canEat(c,q))continue;
+      const d=Math.abs((i>>2)-(j>>2))+Math.abs((i&3)-(j&3));if(d<best)best=d;}
+    if(best<99){const bonus=(10-best)*(P.chase||0);s+=sd(c)===side?bonus:-bonus;}}
+  return s;
+}
+const CH=new Int8Array(32);
+function order(b,mv){
+  const key=m=>{if(m===END)return-2;if(m>=1024)return-1;const d=b[m&31];if(d&&(d&UP))return VAL[d&7]*10-VAL[b[m>>5]&7];return d?150:0;};
+  const ks=mv.map(m=>[key(m),m]);ks.sort((x,y)=>y[0]-x[0]);for(let i=0;i<mv.length;i++)mv[i]=ks[i][1];
+}
+function qs(b,side,alpha,beta,ply,qd){
+  const st=evaluate(b,side);if(qd>=P.q||st>=beta)return st;if(st>alpha)alpha=st;
+  const all=[];gen(b,side,-1,all,true);const mv=all.filter(m=>b[m&31]&UP);
+  if(mv.length>1)order(b,mv);
+  for(const m of mv){const u=make(b,m);const v=!hasPieces(b,1-side)?WIN-ply:-qs(b,1-side,-beta,-alpha,ply+1,qd+1);unmake(b,u);
+    if(v>=beta)return v;if(v>alpha)alpha=v;}
+  return alpha;
+}
+function search(b,side,depth,alpha,beta,chainAt,ply){
+  if(((++nodes)&1023)===0&&Date.now()>DL)aborted=true;
+  if(aborted)return 0;
+  if(depth<=0&&chainAt<0)return qs(b,side,alpha,beta,ply,0);
+  const mv=[];gen(b,side,chainAt,mv,false);
+  if(chainAt>=0)mv.push(END);
+  else{let k=0;for(const j of H){if(k>=P.f)break;const q=b[j];if(q&&!(q&UP)){mv.push(1024+j);k++;}}}
+  if(!mv.length)return-WIN+ply;
+  if(mv.length>1)order(b,mv);
+  let best=-INF;
+  for(const m of mv){let v;
+    if(m===END)v=-search(b,1-side,depth-1,-beta,-alpha,-1,ply+1);
+    else{const u=make(b,m);
+      if(u[0]===0&&u[5]&&!hasPieces(b,1-side))v=WIN-ply;
+      else if(u[0]===0&&u[5]&&X&&canChain(b,u[2],side))v=search(b,side,depth-1,alpha,beta,u[2],ply+1);
+      else v=-search(b,1-side,depth-1,-beta,-alpha,-1,ply+1);
+      unmake(b,u);}
+    if(v>best)best=v;if(v>alpha)alpha=v;if(alpha>=beta)break;}
+  return best;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const LEVELS={medium:{d:1,q:3,s:12,t:500,noise:12,f:2,chase:0},hard:{d:3,q:6,s:40,t:1200,noise:2,f:3,chase:1},hell:{d:4,q:8,s:400,t:2500,noise:0,f:4,deep:5,chase:1.5}};
+function toAction(m){if(m===END)return{type:'end'};if(m>=1024)return{type:'flip',i:m-1024};return{type:'move',from:m>>5,to:m&31};}
+function think(inp){
+  X=inp.variant==='chain';VAL=X?VAL_X:VAL_C;
+  const side=inp.aiCol==='k'?1:0,chainAt=inp.chain==null?-1:inp.chain;
+  const base=new Int8Array(32),hidden=[],cnt=[COUNTS.slice(),COUNTS.slice()];
+  inp.board.forEach((p,i)=>{if(!p)return;if(p.up){const s=p.side==='k'?1:0;base[i]=(s<<3)|IDX[p.t]|UP;cnt[s][IDX[p.t]]--;}else hidden.push(i);});
+  for(const s of['r','k'])for(const t of inp.captured[s])cnt[s==='k'?1:0][IDX[t]]--;
+  const pool=[];for(let s=0;s<2;s++)for(let t=1;t<8;t++)for(let n=0;n<cnt[s][t];n++)pool.push((s<<3)|t);
+  while(pool.length<hidden.length)pool.push(7);
+  const sample=()=>{const b=base.slice(),pl=shuffle(pool.slice());hidden.forEach((i,k)=>b[i]=pl[k]);return b;};
+  // root actions (do not depend on hidden identities)
+  const b0=sample(),root=[];gen(b0,side,chainAt,root,chainAt>=0);
+  if(chainAt>=0)root.push(END);else for(const i of hidden)root.push(1024+i);
+  if(root.length<=1)return toAction(root[0]);
+  if(inp.level==='easy'){
+    const caps=root.filter(m=>m<1024&&(base[m&31]&UP));
+    if(chainAt>=0)return toAction(caps.length&&Math.random()<.5?caps[Math.floor(Math.random()*caps.length)]:END);
+    if(caps.length&&Math.random()<.55){caps.sort((x,y)=>VAL_C[base[y&31]&7]-VAL_C[base[x&31]&7]);return toAction(Math.random()<.5?caps[0]:caps[Math.floor(Math.random()*caps.length)]);}
+    const flips=root.filter(m=>m>=1024&&m<END),moves=root.filter(m=>m<1024);
+    const pickFrom=(flips.length&&(Math.random()<.5||!moves.length))?flips:moves;
+    return toAction(pickFrom[Math.floor(Math.random()*pickFrom.length)]);
+  }
+  P=LEVELS[inp.level]||LEVELS.medium;
+  let depth=1,total=new Float64Array(root.length),ns=0,keep=null;const t0=Date.now(),deadline=t0+P.t;
+  const rootScore=(b,m)=>{
+    if(m===END)return-search(b,1-side,depth-1,-INF,INF,-1,1);
+    const u=make(b,m);let v;
+    if(u[0]===0&&u[5]&&!hasPieces(b,1-side))v=WIN;
+    else if(u[0]===0&&u[5]&&X&&canChain(b,u[2],side))v=search(b,side,depth-1,-INF,INF,u[2],1);
+    else v=-search(b,1-side,depth-1,-INF,INF,-1,1);
+    unmake(b,u);return v;
+  };
+  const runSample=(dl)=>{const b=sample();H=shuffle(hidden.slice());DL=dl;aborted=false;
+    const sc=new Float64Array(root.length);for(let r=0;r<root.length&&!aborted;r++)sc[r]=rootScore(b,root[r]);
+    if(aborted)return false;for(let r=0;r<root.length;r++)total[r]+=sc[r];ns++;return true;};
+  // 1) quick shallow pass: always finishes, used if the deep search runs out of time
+  for(let k=0;k<3;k++)runSample(t0+P.t*4);
+  keep=[total,ns];
+  // 2) full-depth sampling within the time budget (deeper still on hell when there is time)
+  depth=P.d;total=new Float64Array(root.length);ns=0;
+  while(ns<P.s&&Date.now()<deadline){
+    const ts=Date.now();
+    if(!runSample(deadline))break;
+    if(ns===1&&P.deep&&depth<P.deep&&Date.now()-ts<P.t/25){keep=[total,ns];depth=P.deep;total=new Float64Array(root.length);ns=0;}
+  }
+  if(!ns){total=keep[0];ns=keep[1];}
+  if(!ns)return toAction(root[0]);
+  let best=0,bv=-INF;
+  for(let r=0;r<root.length;r++){const v=total[r]/ns+(Math.random()*2-1)*P.noise;if(v>bv){bv=v;best=r;}}
+  return toAction(root[best]);
+}
+</script>
 <script>
 (() => {
 'use strict';
@@ -322,10 +502,11 @@ const VARIANT_NAME = { classic:'傳統暗棋', chain:'車衝馬斜炮飛山' };
 const EMOTES = ['好棋！','哈哈','快一點啦','等我一下','我要吃你了','失誤了…','再一局！'];
 const COLOR_NAME = { r:'紅方', k:'黑方' };
 const $ = id => document.getElementById(id);
+const mem = {};   // fallback when the browser blocks storage (private mode)
 const store = {
-  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
-  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
-  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  get(k){ try{ const v = localStorage.getItem(k); if (v !== null) return JSON.parse(v); }catch(e){} return k in mem ? JSON.parse(mem[k]) : null; },
+  set(k,v){ mem[k] = JSON.stringify(v); try{ localStorage.setItem(k, mem[k]); }catch(e){} },
+  del(k){ delete mem[k]; try{ localStorage.removeItem(k); }catch(e){} }
 };
 const clone = o => JSON.parse(JSON.stringify(o));
 const rand = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
@@ -523,7 +704,7 @@ function apply(s0, act){
 }
 
 /* ================= app state ================= */
-let mode = null;        // 'host' | 'guest' | 'local'
+let mode = null;        // 'host' | 'guest' | 'local' | 'ai'
 let me = 'A';
 let code = '';
 let S = null;
@@ -533,12 +714,116 @@ let soundOn = store.get('anqi:sound') !== false;
 let endDismissedFor = null;
 let pendingConfirm = null, renameSeat = null;
 let animTimer = null, animBoard = null;
+let aiLevel = 'medium', aiBusy = false, aiReq = 0;
+const LEVELS = ['easy','medium','hard','hell'];
+const LEVEL_NAME = { easy:'簡單', medium:'中度', hard:'困難', hell:'地獄' };
+const AI_LINES = ['嘿嘿','換我了','好險','哼哼，吃掉囉','你很厲害喔','讓我想想…'];
+const isNet = () => mode==='host' || mode==='guest';
+const chosenLevel = () => (document.querySelector('input[name=level]:checked') || {}).value || 'medium';
 
 const myName = () => $('nameIn').value.trim() || '我';
 const mySeat = () => mode==='local' ? S.turn : me;
 const chosenVariant = () => $('vChain').checked ? 'chain' : 'classic';
 
-function save(){ if (mode) store.set('anqi:session', {mode, me, code, state:S, name:myName()}); }
+function save(){ if (mode) store.set('anqi:session', {mode, me, code, aiLevel, state:S, name:myName()}); }
+
+/* ================= records (kept on this phone) ================= */
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function recKey(){
+  if (mode==='ai') return 'ai-' + aiLevel;
+  if (isNet()) return 'p-' + ((S.names && S.names[other(me)]) || '對手');
+  return null;
+}
+function recName(k, r){ return k.startsWith('ai-') ? '電腦・' + LEVEL_NAME[k.slice(3)] : (r.name || k.slice(2)); }
+function recordResult(){
+  if (!S || !S.winner) return;
+  const key = recKey(); if (!key) return;
+  const done = store.get('anqi:recorded') || [];
+  if (done.includes(S.id)) return;
+  done.push(S.id); store.set('anqi:recorded', done.slice(-200));
+  const all = store.get('anqi:record') || {};
+  const e = all[key] || {w:0, l:0, d:0};
+  if (S.winner==='draw') e.d++; else if (S.winner===me) e.w++; else e.l++;
+  if (key.startsWith('p-')) e.name = key.slice(2);
+  e.t = Date.now(); all[key] = e; store.set('anqi:record', all);
+  renderRecords();
+}
+function recLine(){
+  const key = recKey(); if (!key) return '';
+  const e = (store.get('anqi:record') || {})[key]; if (!e) return '';
+  return `對${recName(key, e)}：${e.w} 勝 ${e.l} 敗 ${e.d} 和`;
+}
+function renderRecords(){
+  const all = store.get('anqi:record') || {};
+  const keys = LEVELS.map(l => 'ai-'+l).filter(k => all[k])
+    .concat(Object.keys(all).filter(k => k.startsWith('p-')).sort((a,b) => (all[b].t||0) - (all[a].t||0)));
+  $('clearRec').hidden = !keys.length;
+  if (!keys.length){ $('recList').innerHTML = '<p class="empty">還沒有戰績。每下完一局，會自動記在這支手機上。</p>'; return; }
+  $('recList').innerHTML = '<table class="rec"><thead><tr><th>對手</th><th>勝</th><th>敗</th><th>和</th><th>勝率</th></tr></thead><tbody>' +
+    keys.map(k => { const e = all[k], n = e.w + e.l + e.d;
+      return `<tr><td>${esc(recName(k, e))}</td><td class="w">${e.w}</td><td class="l">${e.l}</td><td>${e.d}</td><td>${n ? Math.round(e.w*100/n) + '%' : '-'}</td></tr>`; }).join('') +
+    '</tbody></table>';
+}
+
+/* ================= computer opponent ================= */
+let aiWorker = null, aiMsgId = 0, aiThinkFn = null;
+const aiPending = {};
+function localThink(input){
+  if (!aiThinkFn) aiThinkFn = new Function($('aiEngine').textContent + '\n;return think;')();
+  return aiThinkFn(input);
+}
+function engineThink(input){
+  return new Promise(resolve => {
+    if (aiWorker === null){
+      try{
+        const src = $('aiEngine').textContent + '\nonmessage = e => postMessage({id:e.data.id, a:think(e.data.input)});';
+        aiWorker = new Worker(URL.createObjectURL(new Blob([src], {type:'text/javascript'})));
+        aiWorker.onmessage = e => { const p = aiPending[e.data.id]; delete aiPending[e.data.id]; p && p.resolve(e.data.a); };
+        aiWorker.onerror = () => { aiWorker = false; for (const id in aiPending){ const p = aiPending[id]; delete aiPending[id]; p.resolve(localThink(p.input)); } };
+      }catch(e){ aiWorker = false; }
+    }
+    if (aiWorker){ const id = ++aiMsgId; aiPending[id] = {resolve, input}; aiWorker.postMessage({id, input}); }
+    else setTimeout(() => resolve(localThink(input)), 30);
+  });
+}
+function legalFor(s, a){
+  if (!a) return false;
+  if (a.type==='end') return s.chain != null;
+  if (a.type==='flip') return s.chain == null && s.board[a.i] && !s.board[a.i].up;
+  if (a.type==='move'){
+    const p = s.board[a.from];
+    if (!p || !p.up || p.side !== s.colorOf[s.turn]) return false;
+    if (s.chain != null && s.chain !== a.from) return false;
+    return targets(s.board, a.from, s.variant, s.chain != null).some(t => t.to===a.to);
+  }
+  return false;
+}
+function anyLegal(s){
+  if (s.chain != null){ const t = targets(s.board, s.chain, s.variant, true); return t.length ? {type:'move', from:s.chain, to:t[0].to} : {type:'end'}; }
+  const hid = s.board.map((p,i) => p && !p.up ? i : -1).filter(i => i >= 0);
+  if (hid.length) return {type:'flip', i:hid[rand(hid.length)]};
+  for (let i=0;i<32;i++){ const p = s.board[i]; if (p && p.up && p.side===s.colorOf[s.turn]){ const t = targets(s.board, i, s.variant); if (t.length) return {type:'move', from:i, to:t[0].to}; } }
+  return null;
+}
+function maybeAI(){
+  if (mode!=='ai' || !S || S.winner || S.turn!=='B' || aiBusy) return;
+  aiBusy = true; render();
+  const req = ++aiReq, gid = S.id, seq = S.seq, t0 = Date.now();
+  const done = a => {
+    const wait = Math.max(0, (S && S.chain != null ? 600 : 800) - (Date.now() - t0));
+    setTimeout(() => {
+      aiBusy = false;
+      if (req !== aiReq || !S || S.id !== gid || S.seq !== seq || S.winner){ render(); return; }
+      if (!legalFor(S, a)) a = anyLegal(S);
+      if (a) act(a, true); else render();
+    }, wait);
+  };
+  if (!S.colorOf.B) { done(anyLegal(S)); return; }
+  engineThink({
+    board: S.board.map(p => p ? (p.up ? {t:p.t, side:p.side, up:true} : {up:false}) : null),
+    captured: S.captured, aiCol: S.colorOf.B, variant: S.variant, chain: S.chain, level: aiLevel
+  }).then(done, () => done(anyLegal(S)));
+}
 
 /* ================= render ================= */
 const boardEl = $('board');
@@ -607,7 +892,7 @@ function render(){
     return `<b class="${col}">${COLOR_NAME[col]}</b> · 剩 ${16 - S.captured[col].length} 顆`;
   };
   $('meSide').innerHTML = sideText(seat);
-  $('oppSide').innerHTML = sideText(opp);
+  $('oppSide').innerHTML = sideText(opp) + (mode==='ai' && !S.winner && S.turn==='B' ? ' · <i class="thinking">思考中…</i>' : '');
   const capsHtml = s => {
     const col = S.colorOf[other(s)]; if (!col) return '';
     return S.captured[col].slice().sort((x,y)=>TYPES[y].rank-TYPES[x].rank).map(t => miniPiece(t, col)).join('');
@@ -622,7 +907,7 @@ function render(){
   const chainMine = S.chain != null && myTurn;
   $('chainBar').hidden = S.chain == null || !!S.winner;
   $('endTurnBtn').hidden = !chainMine;
-  $('chainText').innerHTML = chainMine ? '<b>連吃中</b>　還可以繼續吃' : '<b>對方連吃中</b>　等對方吃完…';
+  $('chainText').innerHTML = chainMine ? '<b>連吃中</b>　還可以繼續吃' : (mode==='ai' ? '<b>電腦連吃中</b>　等它吃完…' : '<b>對方連吃中</b>　等對方吃完…');
 
   // end
   if (S.winner && endDismissedFor !== S.id){
@@ -630,7 +915,9 @@ function render(){
     if (S.winner==='draw') title = '和棋';
     else if (mode==='local') title = label(S.winner) + ' 勝';
     else title = S.winner===me ? '你贏了！' : '你輸了';
+    recordResult();
     $('endTitle').textContent = title; $('endText').textContent = S.reason;
+    $('endRec').textContent = recLine();
     $(S.variant==='chain' ? 'eChain' : 'eClassic').checked = true;
     $('endSheet').hidden = false;
   } else if (!S.winner) $('endSheet').hidden = true;
@@ -640,6 +927,7 @@ function renderNet(){
   const dot = $('netDot'), t = $('netText');
   dot.className = 'dot';
   if (mode==='local'){ dot.classList.add('ok'); t.textContent = '同機對戰'; $('roomPill').hidden = true; return; }
+  if (mode==='ai'){ dot.classList.add('ok'); t.textContent = '對戰電腦'; $('roomPill').hidden = true; return; }
   $('roomPill').hidden = false; $('roomCode').textContent = code;
   if (netState==='open'){ dot.classList.add('ok'); t.textContent = '已連線'; }
   else if (netState==='wait'){ dot.classList.add('wait'); t.textContent = mode==='host' ? '等待對方' : '連線中'; }
@@ -686,7 +974,7 @@ function tap(i){
   if (!S || S.winner || animBoard) return;
   const seat = mySeat();
   if (S.turn !== seat){ toast('還沒輪到你喔'); return; }
-  if (mode!=='local' && netState!=='open'){ toast('對方還沒連上，等一下再下'); return; }
+  if (isNet() && netState!=='open'){ toast('對方還沒連上，等一下再下'); return; }
   const b = S.board, p = b[i];
   if (S.chain != null){
     const t = targets(b, S.chain, S.variant, true).find(x => x.to===i);
@@ -707,18 +995,21 @@ function tap(i){
   sel = i; clack('turn'); render();
 }
 
-function act(a){
+function act(a, byAI){
   sel = -1;
   const prev = S;
   S = apply(S, a);
   if (a.type !== 'end') clack(S.last.dark ? 'flip' : S.last.type);
-  if (S.chain != null && !S.last.dark) toast('吃到了！還可以繼續吃');
-  if (S.last && S.last.type==='reveal' && a.type!=='end'){
-    const q = S.board[a.to];
-    toast(q.side === S.board[a.from].side ? '翻到自己的棋，換對方' : '翻到比你大的棋，換對方');
-  }
+  if (!byAI){
+    if (S.chain != null && !S.last.dark) toast('吃到了！還可以繼續吃');
+    if (S.last && S.last.type==='reveal' && a.type!=='end'){
+      const q = S.board[a.to];
+      toast(q.side === S.board[a.from].side ? '翻到自己的棋，換對方' : '翻到比你大的棋，換對方');
+    }
+  } else if (S.last && S.last.type==='cap' && Math.random() < .3) bubble('B', AI_LINES[rand(4)]);
   save(); present(prev); send({type:'state', state:S});
-  if (S.chain != null && S.last.dark) setTimeout(() => toast('吃到了！還可以繼續吃'), 650);
+  if (!byAI && S.chain != null && S.last.dark) setTimeout(() => toast('吃到了！還可以繼續吃'), 650);
+  if (mode==='ai' && S.turn==='B' && !S.winner) setTimeout(maybeAI, S.last && S.last.dark ? 650 : 0);
 }
 
 /* ================= network ================= */
@@ -832,7 +1123,7 @@ function destroyPeer(){
   if (peer){ try{ peer.destroy(); }catch(e){} peer=null; }
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState!=='visible' || !mode || mode==='local') return;
+  if (document.visibilityState!=='visible' || !isNet()) return;
   if (peer && peer.disconnected && !peer.destroyed){ try{ peer.reconnect(); }catch(e){} }
   if (mode==='guest' && !(conn && conn.open)) { destroyPeer(); connectGuest(); }
   if (mode==='host' && (!peer || peer.destroyed)) startHost(true);
@@ -871,6 +1162,14 @@ $('joinBtn').onclick = () => {
   toast('正在連到房間 '+code+'…', 4000);
   connectGuest();
 };
+$('aiBtn').onclick = () => {
+  if (!needName()) return;
+  lobbyError(''); destroyPeer();
+  mode='ai'; me='A'; code=''; aiLevel = chosenLevel(); endDismissedFor = null;
+  store.set('anqi:level', aiLevel);
+  S = newGame({A:myName(), B:'電腦（' + LEVEL_NAME[aiLevel] + '）'}, 'A', chosenVariant());
+  save(); showGame(); toast('你先翻棋');
+};
 $('localBtn').onclick = () => {
   destroyPeer();
   mode='local'; me='A'; code=''; endDismissedFor = null;
@@ -889,7 +1188,8 @@ $('shareBtn').onclick = async () => {
 $('cancelWait').onclick = () => leave();
 
 function leave(keepLobbyErr){
-  destroyPeer(); mode=null; S=null; sel=-1; prevBoard=null; netState='off';
+  destroyPeer(); mode=null; S=null; sel=-1; prevBoard=null; netState='off'; aiReq++; aiBusy=false;
+  renderRecords();
   store.del('anqi:session');
   ['waitSheet','menuSheet','endSheet','confirmSheet','renameSheet'].forEach(id => $(id).hidden = true);
   $('game').hidden = true; $('lobby').hidden = false;
@@ -920,11 +1220,11 @@ $('renameYes').onclick = () => {
 };
 $('renameIn').addEventListener('keydown', e => { if (e.key==='Enter') $('renameYes').click(); });
 
-$('menuBtn').onclick = () => { $('drawBtn').hidden = mode==='local'; $('renameBtn').textContent = mode==='local' ? '修改目前玩家的稱呼' : '修改我的稱呼'; $('menuSheet').hidden = false; };
+$('menuBtn').onclick = () => { $('drawBtn').hidden = !isNet(); $('leaveBtn').textContent = isNet() ? '離開房間' : '回到首頁'; $('renameBtn').textContent = mode==='local' ? '修改目前玩家的稱呼' : '修改我的稱呼'; $('menuSheet').hidden = false; };
 $('closeMenu').onclick = () => $('menuSheet').hidden = true;
 $('soundBtn').onclick = () => { soundOn=!soundOn; store.set('anqi:sound', soundOn); $('soundBtn').textContent = '音效：'+(soundOn?'開':'關'); if (soundOn) clack('msg'); };
 $('soundBtn').textContent = '音效：'+(soundOn?'開':'關');
-$('leaveBtn').onclick = () => { $('menuSheet').hidden = true; confirmBox('離開房間？', '這一局會結束，要再玩就重新開房。', '離開', () => leave()); };
+$('leaveBtn').onclick = () => { $('menuSheet').hidden = true; confirmBox(isNet() ? '離開房間？' : '回到首頁？', isNet() ? '這一局會結束，要再玩就重新開房。' : '這一局會結束（不記戰績）。', '離開', () => leave()); };
 $('resignBtn').onclick = () => {
   $('menuSheet').hidden = true;
   if (!S || S.winner) return;
@@ -950,16 +1250,19 @@ function confirmBox(title, text, yesText, onYes, onNo){
   pendingConfirm = {onYes, onNo}; $('confirmSheet').hidden = false;
 }
 $('confirmYes').onclick = () => { $('confirmSheet').hidden = true; const p = pendingConfirm; pendingConfirm=null; p && p.onYes && p.onYes(); };
+$('clearRec').onclick = () => confirmBox('清除戰績？', '這支手機上的所有勝敗紀錄都會刪掉。', '清除', () => {
+  store.del('anqi:record'); renderRecords(); toast('戰績已清除');
+});
 $('confirmNo').onclick = () => { $('confirmSheet').hidden = true; const p = pendingConfirm; pendingConfirm=null; p && p.onNo && p.onNo(); };
 
 $('againBtn').onclick = () => {
-  if (mode!=='local' && netState!=='open'){ toast('對方不在線上，等連上再開新局'); return; }
+  if (isNet() && netState!=='open'){ toast('對方不在線上，等連上再開新局'); return; }
   const starter = other(S.starter || 'A');
   const names = Object.assign({}, S.names);
   const variant = $('eChain').checked ? 'chain' : 'classic';
   S = newGame(names, starter, variant); sel=-1; prevBoard=null;
   $('endSheet').hidden = true;
-  save(); render(); send({type:'state', state:S});
+  save(); render(); send({type:'state', state:S}); maybeAI();
   toast(VARIANT_NAME[variant] + '・' + (mode==='local' ? (names[starter]||'') : (starter===me ? '你' : (names[starter]||'對方'))) + '先翻棋');
 };
 $('viewBoard').onclick = () => { endDismissedFor = S.id; $('endSheet').hidden = true; };
@@ -970,6 +1273,7 @@ for (const e of EMOTES){
   b.onclick = () => {
     if (mode==='local'){ bubble(S.turn, e); return; }
     bubble(me, e); send({type:'emote', text:e});
+    if (mode==='ai') setTimeout(() => bubble('B', AI_LINES[rand(AI_LINES.length)]), 1200);
   };
   emEl.appendChild(b);
 }
@@ -978,20 +1282,23 @@ for (const e of EMOTES){
 try { buildTextures(); } catch(e) {}
 $('nameIn').value = store.get('anqi:name') || '';
 if (store.get('anqi:variant') === 'chain') $('vChain').checked = true;
+{ const lv = store.get('anqi:level'); if (LEVELS.includes(lv)) $('lv' + lv[0].toUpperCase() + lv.slice(1)).checked = true; }
+renderRecords();
 const qRoom = new URLSearchParams(location.search).get('room');
 const sess = store.get('anqi:session');
 if (sess && sess.mode && sess.state && sess.state.variant && !(qRoom && sess.code !== qRoom)){
-  mode = sess.mode; me = sess.me; code = sess.code || ''; S = sess.state;
+  mode = sess.mode; me = sess.me; code = sess.code || ''; S = sess.state; aiLevel = sess.aiLevel || 'medium';
   if (!$('nameIn').value) $('nameIn').value = sess.name || '';
   showGame();
   if (mode==='host'){ if (typeof Peer!=='undefined') startHost(true); if (!S.names || !S.names.B){ $('waitCode').textContent = code; $('waitSheet').hidden = false; } }
   else if (mode==='guest'){ if (typeof Peer!=='undefined') connectGuest(); }
+  else if (mode==='ai') maybeAI();
 } else if (qRoom && /^\d{4}$/.test(qRoom)){
   $('codeIn').value = qRoom;
   setTimeout(() => ($('nameIn').value ? $('joinBtn') : $('nameIn')).focus(), 50);
 }
 
-window.__anqi = { apply, targets, newGame, hasAction, get S(){ return S; } };
+window.__anqi = { apply, targets, newGame, hasAction, localThink, get S(){ return S; } };
 })();
 </script>
 </body>
