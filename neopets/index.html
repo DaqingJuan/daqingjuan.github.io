@@ -78,6 +78,8 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
 .links a { font-size: .8rem; color: var(--link); text-decoration: none; border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
 .links a:hover { border-color: var(--link); }
 .tag { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; }
+.jackpot { font-size: .8rem; color: var(--accent-ink); }
+.jackpot b { font-weight: 700; }
 .hw { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: var(--pumpkin); background: var(--pumpkin-bg); border: 1px solid var(--pumpkin-line); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; font-variant-numeric: tabular-nums; }
 .hw-banner { background: var(--pumpkin-bg); border: 1px solid var(--pumpkin-line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
 .hw-banner h2 { color: var(--pumpkin); }
@@ -194,6 +196,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
       <li>只有 tony 做每日。zxc、daqing 偶爾登入領 Food Club 獎金、銀行利息、賣股票就好，帳號之間不轉東西。</li>
       <li>銀行一定先領利息，再提出 Food Club 和股票要用的錢。</li>
       <li>轉盤、Apple Bobbing 有機會弄丟背包裡的東西，貴重物品先放保險箱。</li>
+      <li>「可能中」的大獎機率都很低，價格是 Jellyneo 標價，很多是開價。真的抽到時先看 itemdb 的成交紀錄再定價。</li>
       <li>索禮任務的道具，買之前先翻保險箱和背包。</li>
       <li>NeoPass 的手機遊戲任務跳過。</li>
     </ul>
@@ -249,8 +252,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
         <a href="https://www.jellyneo.net/?go=dailypuzzle" target="_blank" rel="noopener">每日謎題答案<span>Jellyneo</span></a>
         <a href="https://www.sunnyneo.com/dailypuzzle.php" target="_blank" rel="noopener">謎題舊題庫<span>SunnyNeo，重播題用</span></a>
         <a href="https://www.jellyneo.net/?go=faerie_crossword" target="_blank" rel="noopener">Faerie 填字答案<span>Jellyneo</span></a>
-        <a href="https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=trick_or_treating" target="_blank" rel="noopener">萬聖節索禮袋線索<span>每天的袋子在哪、問答答案</span></a>
-      </div>
+        <a href="https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=trick_or_treating" target="_blank" rel="noopener">萬聖節索禮袋線索<span>每天的袋子在哪、問答答案</span></a>      </div>
     </section>
   </div>
 
@@ -300,11 +302,11 @@ const SECTIONS = [
   { title: "索禮類", hint: "幫 NPC 找東西換獎勵，道具太貴就跳過", items: [
     { id: "goodiebag", name: "萬聖節索禮袋 Goodie Bags", url: N("/festivaloffears/"), note: "10/23～10/29 每天一個袋子：看線索到指定商店撿袋子，再回活動頁「Goodie Bags」答問答題。", hw: "+50 分 / 題", until: "2026-10-31",
       links: [["今天的線索和答案", "https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=trick_or_treating"]] },
-    { id: "braintree", name: "大腦樹 Brain Tree", url: N("/halloween/braintree.phtml"), note: "先接任務，再做 2 次 Esophagor 拿到年份和地點來回答，限時約 1 小時。", hw: "+35 分 / 天" },
-    { id: "esophagor", name: "埃索妖怪 Esophagor", url: N("/halloween/esophagor.phtml"), note: "餵它指定食物。食物圖示右上角可以換，每樣有 3 個選項輪流。", hw: "+15 分 / 次，無上限" },
+    { id: "braintree", name: "大腦樹 Brain Tree", url: N("/halloween/braintree.phtml"), note: "先接任務，再做 2 次 Esophagor 拿到年份和地點來回答，限時約 1 小時。", jackpot: "Brain Tree Sapling Charm（實際成交約 1,000 萬～1,300 萬）", hw: "+35 分 / 天" },
+    { id: "esophagor", name: "埃索妖怪 Esophagor", url: N("/halloween/esophagor.phtml"), note: "餵它指定食物。食物圖示右上角可以換，每樣有 3 個選項輪流。", jackpot: "Earth Faerie Doll（約 2,000 萬）", hw: "+15 分 / 次，無上限" },
     { id: "witch", name: "女巫塔 Edna", url: N("/halloween/witchtower.phtml"), note: "找 3 樣材料，常常很貴，划不來就跳過。", hw: "+10 分 / 次，一天 10 次" },
-    { id: "kitchen", name: "神秘島廚房 Kitchen Quest", url: N("/island/kitchen.phtml"), note: "一天最多 10 次，道具太貴就不要解。" },
-    { id: "snowfaerie", name: "雪精靈 Snow Faerie", url: N("/winter/snowfaerie.phtml"), note: "一天最多 10 次，道具太貴就不要解。" },
+    { id: "kitchen", name: "神秘島廚房 Kitchen Quest", url: N("/island/kitchen.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Kitchen Quest Cookbook（約 1,950 萬）、Earth Faerie Doll（約 2,000 萬）" },
+    { id: "snowfaerie", name: "雪精靈 Snow Faerie", url: N("/winter/snowfaerie.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Taelia Coin（約 2 億）、冰淇淋機優惠券（約 2,300 萬～2,500 萬）" },
   ]},
   { title: "免費領取", hint: "點一下就拿，一天一次", items: [
     { id: "omelette", name: "巨大歐姆蛋 Giant Omelette", url: N("/prehistoric/omelette.phtml"), note: "拿一片歐姆蛋。" },
@@ -327,18 +329,18 @@ const SECTIONS = [
     { id: "marrow", name: "猜葫蘆有多重 Guess the Marrow", url: N("/medieval/guessmarrow.phtml"), note: "比賽開始時間不固定，沒開就晚點再來。" },
     { id: "apple", name: "蘋果咬咬 Apple Bobbing", url: N("/halloween/applebobbing.phtml"), note: "可能弄丟背包裡的東西，貴重物品先放保險箱。", hw: "+10 分 / 天" },
     { id: "forgottenshore", name: "被遺忘的海灘 Forgotten Shore", url: N("/pirates/forgottenshore.phtml"), note: "要先拼好地圖才能進去。" },
-    { id: "caverns", name: "精靈洞穴 Faerie Caverns", url: N("/faerieland/caverns/index.phtml"), note: "一次 400 NP，隨機拿 NP 或物品。" },
+    { id: "caverns", name: "精靈洞穴 Faerie Caverns", url: N("/faerieland/caverns/index.phtml"), note: "一次 400 NP，隨機拿 NP 或物品。", jackpot: "Faerie Caverns Stamp（約 1.6 億）、Patamoose（約 2,000 萬）" },
     { id: "coconut", name: "擊落椰子果 Coconut Shy", url: N("/halloween/coconutshy.phtml"), note: "要花 NP 丟球。" },
-    { id: "wishing", name: "許願井 Wishing Well", url: N("/wishing.phtml"), note: "投 NP 許願想要的物品。" },
+    { id: "wishing", name: "許願井 Wishing Well", url: N("/wishing.phtml"), note: "投 NP 許願想要的物品。", jackpot: "可指定的郵票類，Holographic Usukicon Stamp（約 6,500 萬）等" },
     { id: "lottery", name: "樂透 Lottery", url: N("/games/lottery.phtml"), note: "一天一次。" },
   ]},
   { title: "轉輪類", hint: "轉盤可能吃掉背包裡的東西，先放保險箱", items: [
     { id: "misfortune", name: "厄運之輪 Wheel of Misfortune", url: N("/halloween/wheel/index.phtml"), note: "活動期間每天有一次免費轉。", tag: "150 NP · 每 2 小時", hw: "+5 分 / 次" },
     { id: "mediocrity", name: "凡世之輪 Wheel of Mediocrity", url: N("/prehistoric/mediocrity.phtml"), note: "", tag: "100 NP · 每 40 分鐘" },
     { id: "excitement", name: "刺激大轉輪 Wheel of Excitement", url: N("/faerieland/wheel.phtml"), note: "", tag: "500 NP · 每 2 小時" },
-    { id: "knowledge", name: "學問之輪 Wheel of Knowledge", url: N("/medieval/knowledge.phtml"), note: "", tag: "400 NP · 一天一次" },
-    { id: "monotony", name: "無聊之輪 Wheel of Monotony", url: N("/prehistoric/monotony/monotony.phtml"), note: "轉很久，開著放就好。", tag: "150 NP · 一天一次" },
-    { id: "extravagance", name: "奢華之輪 Wheel of Extravagance", url: N("/desert/extravagance.phtml"), note: "大多賠錢，不建議。", tag: "100,000 NP" },
+    { id: "knowledge", name: "學問之輪 Wheel of Knowledge", url: N("/medieval/knowledge.phtml"), note: "", jackpot: "Waking the Draik（約 1,800 萬）", tag: "400 NP · 一天一次" },
+    { id: "monotony", name: "無聊之輪 Wheel of Monotony", url: N("/prehistoric/monotony/monotony.phtml"), note: "轉很久，開著放就好。", jackpot: "10 Years to Bloom（約 1.75 億）、Tyrannia Stamp（約 1,750 萬）、Doost（約 1,450 萬）", tag: "150 NP · 一天一次" },
+    { id: "extravagance", name: "奢華之輪 Wheel of Extravagance", url: N("/desert/extravagance.phtml"), note: "大多賠錢，不建議。", jackpot: "Interplanetary Communications（約 2 億）、Queen Fyora Usuki Doll（約 7,500 萬）", tag: "100,000 NP" },
   ]},
   { title: "刮刮樂", items: [
     { id: "scratch-hw", name: "廢棄遊樂場刮刮樂 Deserted Fairground", url: N("/halloween/scratch.phtml"), note: "買卡後選卡片按「Sscratch」，刮 9 格裡的 6 格。要在網頁版刮才算積分。", tag: "1,200 NP · 每 2 小時", hw: "+5 分 / 張，一天 5 張" },
@@ -346,15 +348,15 @@ const SECTIONS = [
     { id: "scratch-winter", name: "冰雪刮刮樂販售亭", url: N("/winter/kiosk.phtml"), note: "", tag: "600 NP · 每 6 小時" },
   ]},
   { title: "有冷卻時間", hint: "一天可以做好幾次", items: [
-    { id: "springs", name: "康復泉 Healing Springs", url: N("/faerieland/springs.phtml"), note: "治好寵物、補血，偶爾送藥水。", tag: "每 30 分鐘" },
-    { id: "strength", name: "力大無窮 Test Your Strength", url: N("/halloween/strtest/index.phtml"), note: "", tag: "每 6 小時", hw: "+10 分 / 次，一天 4 次" },
-    { id: "gravedanger", name: "前方凶險 Grave Danger", url: N("/halloween/gravedanger/"), note: "派寵物玩伴去探險，回來領東西。需要寵物玩伴。", tag: "1～7 小時", hw: "+5 分 / 次" },
+    { id: "springs", name: "康復泉 Healing Springs", url: N("/faerieland/springs.phtml"), note: "治好寵物、補血，偶爾送藥水。", jackpot: "Jade Scorchstone（約 7,000 萬）", tag: "每 30 分鐘" },
+    { id: "strength", name: "力大無窮 Test Your Strength", url: N("/halloween/strtest/index.phtml"), note: "", jackpot: "Hungry Fungus（約 2,000 萬）、Zomutt（約 1,750 萬）、Runny Snot（約 1,350 萬）", tag: "每 6 小時", hw: "+10 分 / 次，一天 4 次" },
+    { id: "gravedanger", name: "前方凶險 Grave Danger", url: N("/halloween/gravedanger/"), note: "派寵物玩伴去探險，回來領東西。需要寵物玩伴。", jackpot: "寵物玩伴 Mootix（約 1,950 萬）、Glyme（約 1,625 萬）", tag: "1～7 小時", hw: "+5 分 / 次" },
     { id: "buried", name: "藏寶 Buried Treasure", url: N("/pirates/buriedtreasure/index.phtml"), note: "", tag: "300 NP · 每 3 小時" },
-    { id: "fishing", name: "釣釣漩渦 Fishing", url: N("/water/fishing.phtml"), note: "寵物釣魚技能會升級。", tag: "隨機冷卻" },
-    { id: "shrine", name: "科贊神龕 Coltzan's Shrine", url: N("/desert/shrine.phtml"), note: "有機會加能力值或給 NP。", tag: "每 13 小時" },
-    { id: "snowager", name: "大雪怪 Snowager", url: N("/winter/snowager.phtml"), note: "牠睡著時可以偷寶物，被噴到寵物會掉血。", tag: "6、14、22 點 NST" },
+    { id: "fishing", name: "釣釣漩渦 Fishing", url: N("/water/fishing.phtml"), note: "寵物釣魚技能會升級，等級越高越容易釣到好東西。兩隻寵物都要釣。", jackpot: "變身藥水 Transmogrification Potion（約 1,250 萬～2,000 萬）", tag: "隨機冷卻" },
+    { id: "shrine", name: "科贊神龕 Coltzan's Shrine", url: N("/desert/shrine.phtml"), note: "有機會加能力值或給 NP。", jackpot: "Coltzans Diadem（約 1,450 萬）", tag: "每 13 小時" },
+    { id: "snowager", name: "大雪怪 Snowager", url: N("/winter/snowager.phtml"), note: "牠睡著時可以偷寶物，被噴到寵物會掉血。", jackpot: "Sloth Negg（約 1,400 萬）", tag: "6、14、22 點 NST" },
     { id: "dice", name: "致命骰子 Deadly Dice", url: N("/worlds/deadlydice.phtml"), note: "只在 NST 凌晨 0–1 點開。", tag: "0–1 點 NST" },
-    { id: "symolhole", name: "地瓜鼠洞 Symol Hole", url: N("/medieval/symolhole.phtml"), note: "需要寵物玩伴。" },
+    { id: "symolhole", name: "地瓜鼠洞 Symol Hole", url: N("/medieval/symolhole.phtml"), note: "需要寵物玩伴。", jackpot: "Dig Down, Dig Deep（約 1,300 萬）" },
     { id: "turmaculus", name: "特馬庫拉斯 Turmaculus", url: N("/medieval/turmaculus.phtml"), note: "需要寵物玩伴，寵物玩伴有機會被吃掉。" },
     { id: "academy", name: "海盜學院訓練 Swashbuckling Academy", url: N("/pirates/academy.phtml?type=status"), note: "課上完按 Complete Course 再報下一期。學費先翻保險箱的 Dubloon。", tag: "4～6 小時" },
   ]},
@@ -365,11 +367,11 @@ const SECTIONS = [
     { id: "negg", name: "新奇蛋洞穴 Negg Cave", url: N("/shenkuu/neggcave/"), note: "照線索排 9 格符號和顏色。" },
     { id: "crossword", name: "Faerie 填字 Crossword", url: N("/games/crossword/crossword.phtml"), note: "答案照題號順序填，5 分鐘內完成有 600 NP。",
       links: [["Jellyneo 答案", "https://www.jellyneo.net/?go=faerie_crossword"]] },
-    { id: "kpop", name: "奇扣戳氣球 Kiko Pop", url: N("/worlds/kiko/kpop/"), note: "選難度後丟飛鏢。" },
-    { id: "grumpy", name: "暴躁老國王 Grumpy Old King", url: N("/medieval/grumpyking.phtml"), note: "講笑話給國王聽，一天 2 次。", tag: "一天 2 次" },
+    { id: "kpop", name: "奇扣戳氣球 Kiko Pop", url: N("/worlds/kiko/kpop/"), note: "選難度後丟飛鏢。", jackpot: "Holographic Usukicon Stamp（約 6,500 萬）、Flaming Meerca Stamp（約 6,000 萬）" },
+    { id: "grumpy", name: "暴躁老國王 Grumpy Old King", url: N("/medieval/grumpyking.phtml"), note: "講笑話給國王聽，一天 2 次。", jackpot: "Skarl Royal Crown、King Skarl Quiguki Plushie（各約 2,000 萬）", tag: "一天 2 次" },
     { id: "wiseking", name: "智慧老國王 Wise Old King", url: N("/medieval/wiseking.phtml"), note: "選一句格言，一天 1 次。" },
     { id: "battledome", name: "競技場 Battledome", url: N("/dome/fight.phtml"), note: "I_am_you_are_me 打 Mr. Chuckles（Hard），一天上限 50,000 NP、15 個道具。", tag: "約 50 場" },
-    { id: "hwhunt", name: "鬧鬼森林尋寶 Haunted Woods Hunt", url: N("/halloween/haunted_woods_hunt.phtml"), note: "免費次數用完要 NC 道具。", hw: "+15 分 / 次，一天 2 次" },
+    { id: "hwhunt", name: "鬧鬼森林尋寶 Haunted Woods Hunt", url: N("/halloween/haunted_woods_hunt.phtml"), note: "免費次數用完要 NC 道具。", jackpot: "Hungry Fungus（約 2,000 萬）", hw: "+15 分 / 次，一天 2 次" },
   ]},
 ];
 
@@ -404,6 +406,7 @@ function itemHtml(it) {
       <div class="body">
         <span class="name"><a href="${it.url}" target="_blank" rel="noopener">${esc(it.name)}</a>${it.tag ? `<span class="tag">${esc(it.tag)}</span>` : ""}${hw ? `<span class="hw">萬聖節 ${esc(it.hw)}</span>` : ""}</span>
         ${it.note ? `<span class="note">${esc(it.note)}</span>` : ""}
+        ${it.jackpot ? `<span class="jackpot"><b>可能中：</b>${esc(it.jackpot)}</span>` : ""}
         ${it.links ? `<div class="links">${it.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}
       </div>
     </div>`;
