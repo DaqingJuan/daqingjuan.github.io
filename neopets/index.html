@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>尼奧每日清單</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow column of quest cards grouped by kind; a sticky progress bar tracks today's NST day; Halloween point earners carry a pumpkin badge. */
+:root {
+  --bg: #eef3fb;
+  --panel: #ffffff;
+  --ink: #1d2540;
+  --muted: #5f6a88;
+  --line: #d6deee;
+  --accent: #e8a31b;
+  --accent-ink: #6b4500;
+  --done: #2f9d6a;
+  --done-bg: #e6f5ee;
+  --link: #2c55c9;
+  --pumpkin: #c2531a;
+  --pumpkin-bg: #fdeadd;
+  --pumpkin-line: #f2b48c;
+  --font-display: "Baloo 2", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121829; --panel: #1b2338; --ink: #e8ecf8; --muted: #9aa4c2; --line: #2c3654;
+    --accent: #f2b53a; --accent-ink: #f7d38a; --done: #4cc58c; --done-bg: #173329; --link: #8fb0ff;
+    --pumpkin: #ff9a55; --pumpkin-bg: #3a2418; --pumpkin-line: #7a4426;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121829; --panel: #1b2338; --ink: #e8ecf8; --muted: #9aa4c2; --line: #2c3654;
+  --accent: #f2b53a; --accent-ink: #f7d38a; --done: #4cc58c; --done-bg: #173329; --link: #8fb0ff;
+  --pumpkin: #ff9a55; --pumpkin-bg: #3a2418; --pumpkin-line: #7a4426;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 2rem; line-height: 1.1; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: .9rem; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: grid; gap: 8px; }
+.bar-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.count { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.clock { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.fill { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .3s ease; }
+.fill.full { background: var(--done); }
+section { display: grid; gap: 10px; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; margin: 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; color: var(--muted); }
+.list { display: grid; gap: 8px; }
+.item { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; transition: background .2s; }
+.item.is-hw { border-color: var(--pumpkin-line); }
+.item.is-done { background: var(--done-bg); border-color: transparent; }
+.item.is-done .name { text-decoration: line-through; text-decoration-color: var(--done); color: var(--muted); }
+.check { appearance: none; width: 24px; height: 24px; margin: 2px 0 0; border: 2px solid var(--line); border-radius: 7px; background: var(--panel); cursor: pointer; display: grid; place-items: center; }
+.check:checked { background: var(--done); border-color: var(--done); }
+.check:checked::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.check:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.body { min-width: 0; display: grid; gap: 3px; }
+.name { font-weight: 700; }
+.name a { color: inherit; text-decoration: none; }
+.name a:hover { color: var(--link); text-decoration: underline; }
+.note { color: var(--muted); font-size: .86rem; }
+.links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.links a { font-size: .8rem; color: var(--link); text-decoration: none; border: 1px solid var(--line); border-radius: 99px; padding: 2px 10px; }
+.links a:hover { border-color: var(--link); }
+.tag { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; }
+.hw { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: var(--pumpkin); background: var(--pumpkin-bg); border: 1px solid var(--pumpkin-line); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; font-variant-numeric: tabular-nums; }
+.hw-banner { background: var(--pumpkin-bg); border: 1px solid var(--pumpkin-line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
+.hw-banner h2 { color: var(--pumpkin); }
+.hw-banner p { margin: 0; font-size: .88rem; }
+.hw-banner .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.hw-banner a { color: var(--pumpkin); font-weight: 700; font-size: .86rem; }
+.toggle { font: inherit; font-size: .85rem; font-weight: 700; color: var(--pumpkin); background: var(--panel); border: 1px solid var(--pumpkin-line); border-radius: 99px; padding: 4px 12px; cursor: pointer; }
+.toggle[aria-pressed="true"] { background: var(--pumpkin); border-color: var(--pumpkin); color: var(--panel); }
+.tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.tools a { display: grid; gap: 1px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--ink); text-decoration: none; }
+.tools a:hover { border-color: var(--link); }
+.tools span { font-size: .8rem; color: var(--muted); }
+.site { display: grid; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.site.feature { border: 2px solid var(--accent); }
+.site a.site-name { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--ink); text-decoration: none; }
+.site a.site-name:hover { color: var(--link); text-decoration: underline; }
+.site .url { font-family: var(--font-mono); font-size: .76rem; color: var(--muted); word-break: break-all; }
+.site ul { margin: 0; padding-left: 1.1em; font-size: .88rem; display: grid; gap: 2px; }
+.memo { background: var(--panel); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 16px; margin: 0; display: grid; gap: 6px; font-size: .88rem; }
+.memo li { margin-left: 1.1em; }
+.shopcard { display: grid; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.shopcard span { font-size: .8rem; color: var(--muted); }
+.shopcard .shopname { color: var(--ink); text-decoration: none; font-weight: 700; }
+.shopcard .shopname:hover { color: var(--link); text-decoration: underline; }
+.shopcard .value { font-size: .8rem; color: var(--link); text-decoration: none; margin-top: 4px; }
+.shopcard .value:hover { text-decoration: underline; }
+.all-shops { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.all-shops summary { cursor: pointer; font-weight: 700; }
+.all-shops h3 { font-size: .85rem; color: var(--muted); margin: 14px 0 6px; font-weight: 700; letter-spacing: .04em; }
+.all-shops .links { margin: 0; }
+.reset { justify-self: start; font: inherit; font-size: .85rem; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.reset:hover { color: var(--ink); border-color: var(--muted); }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { font: inherit; font-weight: 700; color: var(--muted); background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 12px; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.panel { display: grid; gap: 22px; }
+.panel[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .fill, .item { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>尼奧每日清單</h1>
+    <p class="sub">主帳號 tony22656176 · 勾選會在尼奧時間（NST）午夜自動清空</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" id="t-daily" aria-controls="tab-daily" aria-selected="true">每日清單</button>
+    <button type="button" role="tab" id="t-sites" aria-controls="tab-sites" aria-selected="false">相關網站</button>
+    <button type="button" role="tab" id="t-clothes" aria-controls="tab-clothes" aria-selected="false">服飾商店</button>
+  </nav>
+
+  <div class="panel" id="tab-daily" role="tabpanel" aria-labelledby="t-daily">
+  <div class="hw-banner" id="hw-banner">
+    <h2>萬聖節 Fright Track <small>到 10/31 23:59 NST</small></h2>
+    <p>有橘色「萬聖節」標籤的項目可以累積活動積分，總共 2,500 分。最值錢的是 1,625 分的 Ghost Paint Brush（約 30～40 萬 NP），2,375 分有 Candy Vampire。</p>
+    <p>Esophagor 規則：先翻保險箱和背包 → 2 萬內直接買 → 太貴就按圖示換（每樣有 3 個選項輪流）→ 換過還在 2.5 萬內就買 → 全部超過 3 萬就放著讓它過期。</p>
+    <div class="row">
+      <button class="toggle" id="hw-only" type="button" aria-pressed="false">只看萬聖節積分項目</button>
+      <a href="https://www.neopets.com/festivaloffears/?prizepass=1" target="_blank" rel="noopener">看目前積分 →</a>
+      <a href="https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=fright_track" target="_blank" rel="noopener">積分攻略 →</a>
+    </div>
+  </div>
+
+  <div class="bar" aria-live="polite">
+    <div class="bar-row">
+      <span class="count" id="count">0</span>
+      <span class="clock" id="clock">NST --:--</span>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+
+  <div id="sections"></div>
+
+  <section>
+    <h2>每月一次</h2>
+    <div class="tools">
+      <a href="https://www.neopets.com/freebies/index.phtml" target="_blank" rel="noopener">尼奧寵物好料 Freebies<span>每月領 2,000 NP，每隻寵物都有食物</span></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>NPC 商店搶貨 <small>你自己來，要手快</small></h2>
+    <ul class="memo">
+      <li>商店每隔幾分鐘會補貨，補到稀有的東西時，馬上點下去買再轉賣就能賺錢。</li>
+      <li>不知道哪個值錢：先只挑一家店，點卡片上的「值錢清單」，裡面是那家店會補、市價 5,000～500,000 的東西，從最貴的排起。每天記 10 個名字就好。</li>
+      <li>一般來說：店裡價錢特別高、而且只剩 1～2 個的，通常是稀有貨。</li>
+      <li>買之前先用 Shop Wizard 或 itemdb 查行情，差價夠大才買。</li>
+      <li>買的時候會進殺價頁，出價低一點再慢慢加；最後要點寵物圖片才能成交（防機器人）。</li>
+      <li>不要瘋狂按重新整理，太快會被暫時禁止買東西。</li>
+    </ul>
+    <div class="tools" id="shops-top"></div>
+    <details class="all-shops">
+      <summary>全部 NPC 商店</summary>
+      <div id="shops-all"></div>
+    </details>
+  </section>
+
+  <section>
+    <h2>常用工具 <small>不用每天去</small></h2>
+    <div class="tools">
+      <a href="https://www.neopets.com/shops/wizard.phtml" target="_blank" rel="noopener">Shop Wizard<span>找最便宜的東西</span></a>
+      <a href="https://www.neopets.com/inventory.phtml" target="_blank" rel="noopener">背包<span>Inventory</span></a>
+      <a href="https://www.neopets.com/safetydeposit.phtml" target="_blank" rel="noopener">保險箱<span>Safety Deposit Box</span></a>
+      <a href="https://www.neopets.com/hospital.phtml" target="_blank" rel="noopener">醫院<span>寵物生病時查解藥</span></a>
+      <a href="https://www.neopets.com/games/treasure.phtml" target="_blank" rel="noopener">藏寶圖兌換<span>神秘實驗室、寵物玩伴實驗室</span></a>
+      <a href="https://www.neopets.com/magma/index.phtml" target="_blank" rel="noopener">莫塔拉城 Moltara<span>找齒輪</span></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>提醒</h2>
+    <ul class="memo">
+      <li>只有 tony 做每日。zxc、daqing 偶爾登入領 Food Club 獎金、銀行利息、賣股票就好，帳號之間不轉東西。</li>
+      <li>銀行一定先領利息，再提出 Food Club 和股票要用的錢。</li>
+      <li>轉盤、Apple Bobbing 有機會弄丟背包裡的東西，貴重物品先放保險箱。</li>
+      <li>索禮任務的道具，買之前先翻保險箱和背包。</li>
+      <li>NeoPass 的手機遊戲任務跳過。</li>
+    </ul>
+  </section>
+
+  <button class="reset" id="reset" type="button">清空今天的勾選</button>
+  </div>
+
+  <div class="panel" id="tab-sites" role="tabpanel" aria-labelledby="t-sites" hidden>
+    <section>
+      <h2>查物品價值</h2>
+      <div class="site feature">
+        <a class="site-name" href="https://itemdb.com.br/" target="_blank" rel="noopener">itemdb</a>
+        <span class="url">itemdb.com.br</span>
+        <ul>
+          <li>輸入物品英文名稱，看目前市價、價格走勢、哪裡拿得到。</li>
+          <li>新出的活動物品，Jellyneo 還沒有價格時可以先查這裡。</li>
+          <li>賣東西、搶 NPC 商店前都可以先查一次。</li>
+        </ul>
+      </div>
+      <div class="site">
+        <a class="site-name" href="https://items.jellyneo.net/" target="_blank" rel="noopener">Jellyneo 物品資料庫</a>
+        <span class="url">items.jellyneo.net</span>
+        <ul>
+          <li>價格、稀有度、哪家 NPC 店會補貨。</li>
+          <li>剛推出的物品價格可能還沒更新，以 Shop Wizard 實際賣價為準。</li>
+        </ul>
+      </div>
+      <div class="site">
+        <a class="site-name" href="https://www.neopets.com/shops/wizard.phtml" target="_blank" rel="noopener">Shop Wizard</a>
+        <span class="url">neopets.com/shops/wizard.phtml</span>
+        <ul>
+          <li>遊戲內建的比價：看玩家商店現在最便宜賣多少。</li>
+          <li>每次只搜一區，按「Resubmit」多搜幾次才看得到最低價。</li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <h2>競吃俱樂部 Food Club 分析</h2>
+      <div class="site">
+        <a class="site-name" href="https://neofood.club/" target="_blank" rel="noopener">NeoFoodClub</a>
+        <span class="url">neofood.club</span>
+        <ul>
+          <li>自動算出當輪最划算的 10 注組合，打開就是目前這一輪。</li>
+          <li>Max bet 設成 13,332（tony 目前的每注上限）。</li>
+          <li>下注頁：<a href="https://www.neopets.com/pirates/foodclub.phtml?type=bet" target="_blank" rel="noopener">Food Club 下注</a></li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <h2>每日答案</h2>
+      <div class="tools">
+        <a href="https://www.jellyneo.net/?go=dailypuzzle" target="_blank" rel="noopener">每日謎題答案<span>Jellyneo</span></a>
+        <a href="https://www.sunnyneo.com/dailypuzzle.php" target="_blank" rel="noopener">謎題舊題庫<span>SunnyNeo，重播題用</span></a>
+        <a href="https://www.jellyneo.net/?go=faerie_crossword" target="_blank" rel="noopener">Faerie 填字答案<span>Jellyneo</span></a>
+        <a href="https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=trick_or_treating" target="_blank" rel="noopener">萬聖節索禮袋線索<span>每天的袋子在哪、問答答案</span></a>
+        <a href="https://peihuatsai.blogspot.com/2016/06/blog-post.html" target="_blank" rel="noopener">尼奧每日必按連結<span>這份清單的分類參考</span></a>
+      </div>
+    </section>
+  </div>
+
+  <div class="panel" id="tab-clothes" role="tabpanel" aria-labelledby="t-clothes" hidden>
+    <section>
+      <h2>NPC 服飾店 <small>全部 5 間，用 NP 買得到的衣服都在這</small></h2>
+      <div class="tools" id="clothes-shops"></div>
+    </section>
+    <section>
+      <h2>偶爾有穿戴品 <small>不是服飾店，但有時會補到</small></h2>
+      <div class="tools" id="clothes-extra"></div>
+    </section>
+    <section>
+      <h2>買衣服小提醒</h2>
+      <ul class="memo">
+        <li>衣服要寵物「種族」合適才能穿。點商品時，名稱有寫種族的（例如 Chia Wings）只有那個種族能穿；背景、前景所有寵物都能用。</li>
+        <li>買之前先用 Shop Wizard 比價，玩家商店常常比 NPC 便宜。</li>
+        <li>NPC 商店結帳會進殺價頁，用店家開的價直接買最省事。</li>
+        <li>買到的衣服先放進「衣櫃 Closet」，換裝頁（Customise）才看得到。</li>
+        <li>這些店每隔幾分鐘補貨，賣光（Sold out）就晚點再來。</li>
+      </ul>
+      <div class="tools">
+        <a href="https://www.neopets.com/customise/" target="_blank" rel="noopener">換裝 Customise<span>幫寵物穿衣服</span></a>
+        <a href="https://www.neopets.com/closet.phtml" target="_blank" rel="noopener">衣櫃 Closet<span>放已經有的衣服</span></a>
+        <a href="https://www.neopets.com/shops/wizard.phtml" target="_blank" rel="noopener">Shop Wizard<span>買之前先比價</span></a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const N = (p) => `https://www.neopets.com${p}`;
+// hw: Fright Track points this activity earns during the Festival of Fears.
+const SECTIONS = [
+  { title: "錢先處理", hint: "照順序", items: [
+    { id: "bank", name: "銀行領利息", url: N("/bank.phtml"), note: "先領利息，再提出今天要用的錢。Ultimate Riches 帳戶 12.5%。" },
+    { id: "fc-collect", name: "Food Club 領獎金", url: N("/pirates/foodclub.phtml?tab=collect"), note: "昨天的注要手動領。" },
+    { id: "fc-bet", name: "Food Club 下注", url: N("/pirates/foodclub.phtml?tab=bet"), note: "10 注，每注上限約 13,332 NP。", tag: "10 注",
+      links: [["NeoFoodClub 選注", "https://neofood.club/"]] },
+    { id: "stock", name: "買股票 1,000 股", url: N("/stockmarket.phtml?type=list&full=true"), note: "挑 15 NP 最便宜的股票。", tag: "1,000 股",
+      links: [["下單頁", N("/stockmarket.phtml?type=buy")]] },
+  ]},
+  { title: "任務", items: [
+    { id: "quest", name: "每日任務 Quest Log", url: N("/questlog/"), note: "5 個做完記得按 Claim。", tag: "+20,000 NP" },
+    { id: "trudy", name: "Trudy's Surprise", url: N("/trudys_surprise.phtml"), note: "連續 25 天有 100,000 NP。" },
+  ]},
+  { title: "索禮類", hint: "幫 NPC 找東西換獎勵，道具太貴就跳過", items: [
+    { id: "goodiebag", name: "萬聖節索禮袋 Goodie Bags", url: N("/festivaloffears/"), note: "10/23～10/29 每天一個袋子：看線索到指定商店撿袋子，再回活動頁「Goodie Bags」答問答題。", hw: "+50 分 / 題", until: "2026-10-31",
+      links: [["今天的線索和答案", "https://www.jellyneo.net/?go=festival_of_fears&year=2026&id=trick_or_treating"]] },
+    { id: "braintree", name: "大腦樹 Brain Tree", url: N("/halloween/braintree.phtml"), note: "先接任務，再做 2 次 Esophagor 拿到年份和地點來回答，限時約 1 小時。", hw: "+35 分 / 天" },
+    { id: "esophagor", name: "埃索妖怪 Esophagor", url: N("/halloween/esophagor.phtml"), note: "餵它指定食物。食物圖示右上角可以換，每樣有 3 個選項輪流。", hw: "+15 分 / 次，無上限" },
+    { id: "witch", name: "女巫塔 Edna", url: N("/halloween/witchtower.phtml"), note: "找 3 樣材料，常常很貴，划不來就跳過。", hw: "+10 分 / 次，一天 10 次" },
+    { id: "kitchen", name: "神秘島廚房 Kitchen Quest", url: N("/island/kitchen.phtml"), note: "一天最多 10 次，道具太貴就不要解。" },
+    { id: "snowfaerie", name: "雪精靈 Snow Faerie", url: N("/winter/snowfaerie.phtml"), note: "一天最多 10 次，道具太貴就不要解。" },
+  ]},
+  { title: "免費領取", hint: "點一下就拿，一天一次", items: [
+    { id: "omelette", name: "巨大歐姆蛋 Giant Omelette", url: N("/prehistoric/omelette.phtml"), note: "拿一片歐姆蛋。" },
+    { id: "jelly", name: "巨大果凍 Giant Jelly", url: N("/jelly/jelly.phtml"), note: "拿一塊果凍。" },
+    { id: "petpetpark", name: "寵物玩伴公園 Petpet Park", url: N("/petpetpark/daily.phtml"), note: "點「Look in the Toy Chest」拿東西。" },
+    { id: "quarry", name: "黑曜石採石場 Obsidian Quarry", url: N("/magma/quarry.phtml"), note: "拿一塊黑曜石。" },
+    { id: "tdmbgpop", name: "藍色 Grundo 娃娃 TDMBGPOP", url: N("/faerieland/tdmbgpop.phtml"), note: "跟娃娃說話。" },
+    { id: "slorg", name: "商店回饋 Rich Slorg", url: N("/shop_of_offers.phtml?slorg_payout=yes"), note: "隨機拿 50 或 100 NP。" },
+    { id: "council", name: "阿塔都議會 Altador Council", url: N("/altador/council.phtml"), note: "完成 Altador 劇情才有每日禮物。" },
+    { id: "moneytree", name: "搖錢樹 Money Tree", url: N("/donations.phtml"), note: "別人捐的免費東西，一天最多拿 10 樣。" },
+    { id: "ads", name: "每日廣告獎勵", url: N("/home/"), note: "首頁的 Daily Ad Rewards。" },
+  ]},
+  { title: "運氣抽獎", hint: "免費或便宜，碰運氣", items: [
+    { id: "anchor", name: "固定錨管理 Anchor Management", url: N("/pirates/anchormanagement.phtml"), note: "把大海怪打跑，送一樣東西。" },
+    { id: "fruit", name: "水果機 Fruit Machine", url: N("/desert/fruitmachine.phtml"), note: "免費轉一次。" },
+    { id: "tombola", name: "湯博拉大抽獎 Tombola", url: N("/island/tombola.phtml"), note: "免費抽一次。" },
+    { id: "tomb", name: "靈墓廢墟 Deserted Tomb", url: N("/worlds/geraptiku/tomb.phtml"), note: "進古墓碰運氣。" },
+    { id: "meteor", name: "科硫墩流星 Meteor", url: N("/moon/meteor.phtml"), note: "選「Poke the meteor」，每小時可試，一天最多中一次。", tag: "每小時" },
+    { id: "expellibox", name: "聖甲蟲移除器 Qasalan Expellibox", url: "https://ncmall.neopets.com/mall/shop.phtml?page=giveaway", note: "按 Start Game 讓聖甲蟲掉下去，要在 Chrome 用 Ruffle 玩。" },
+    { id: "marrow", name: "猜葫蘆有多重 Guess the Marrow", url: N("/medieval/guessmarrow.phtml"), note: "比賽開始時間不固定，沒開就晚點再來。" },
+    { id: "apple", name: "蘋果咬咬 Apple Bobbing", url: N("/halloween/applebobbing.phtml"), note: "可能弄丟背包裡的東西，貴重物品先放保險箱。", hw: "+10 分 / 天" },
+    { id: "forgottenshore", name: "被遺忘的海灘 Forgotten Shore", url: N("/pirates/forgottenshore.phtml"), note: "要先拼好地圖才能進去。" },
+    { id: "caverns", name: "精靈洞穴 Faerie Caverns", url: N("/faerieland/caverns/index.phtml"), note: "一次 400 NP，隨機拿 NP 或物品。" },
+    { id: "coconut", name: "擊落椰子果 Coconut Shy", url: N("/halloween/coconutshy.phtml"), note: "要花 NP 丟球。" },
+    { id: "wishing", name: "許願井 Wishing Well", url: N("/wishing.phtml"), note: "投 NP 許願想要的物品。" },
+    { id: "lottery", name: "樂透 Lottery", url: N("/games/lottery.phtml"), note: "一天一次。" },
+  ]},
+  { title: "轉輪類", hint: "轉盤可能吃掉背包裡的東西，先放保險箱", items: [
+    { id: "misfortune", name: "厄運之輪 Wheel of Misfortune", url: N("/halloween/wheel/index.phtml"), note: "活動期間每天有一次免費轉。", tag: "150 NP · 每 2 小時", hw: "+5 分 / 次" },
+    { id: "mediocrity", name: "凡世之輪 Wheel of Mediocrity", url: N("/prehistoric/mediocrity.phtml"), note: "", tag: "100 NP · 每 40 分鐘" },
+    { id: "excitement", name: "刺激大轉輪 Wheel of Excitement", url: N("/faerieland/wheel.phtml"), note: "", tag: "500 NP · 每 2 小時" },
+    { id: "knowledge", name: "學問之輪 Wheel of Knowledge", url: N("/medieval/knowledge.phtml"), note: "", tag: "400 NP · 一天一次" },
+    { id: "monotony", name: "無聊之輪 Wheel of Monotony", url: N("/prehistoric/monotony/monotony.phtml"), note: "轉很久，開著放就好。", tag: "150 NP · 一天一次" },
+    { id: "extravagance", name: "奢華之輪 Wheel of Extravagance", url: N("/desert/extravagance.phtml"), note: "大多賠錢，不建議。", tag: "100,000 NP" },
+  ]},
+  { title: "刮刮樂", items: [
+    { id: "scratch-hw", name: "廢棄遊樂場刮刮樂 Deserted Fairground", url: N("/halloween/scratch.phtml"), note: "買卡後選卡片按「Sscratch」，刮 9 格裡的 6 格。要在網頁版刮才算積分。", tag: "1,200 NP · 每 2 小時", hw: "+5 分 / 張，一天 5 張" },
+    { id: "scratch-desert", name: "失落沙漠刮刮樂", url: N("/desert/sc/kiosk.phtml"), note: "", tag: "500 NP · 每 4 小時" },
+    { id: "scratch-winter", name: "冰雪刮刮樂販售亭", url: N("/winter/kiosk.phtml"), note: "", tag: "600 NP · 每 6 小時" },
+  ]},
+  { title: "有冷卻時間", hint: "一天可以做好幾次", items: [
+    { id: "springs", name: "康復泉 Healing Springs", url: N("/faerieland/springs.phtml"), note: "治好寵物、補血，偶爾送藥水。", tag: "每 30 分鐘" },
+    { id: "strength", name: "力大無窮 Test Your Strength", url: N("/halloween/strtest/index.phtml"), note: "", tag: "每 6 小時", hw: "+10 分 / 次，一天 4 次" },
+    { id: "gravedanger", name: "前方凶險 Grave Danger", url: N("/halloween/gravedanger/"), note: "派寵物玩伴去探險，回來領東西。需要寵物玩伴。", tag: "1～7 小時", hw: "+5 分 / 次" },
+    { id: "buried", name: "藏寶 Buried Treasure", url: N("/pirates/buriedtreasure/index.phtml"), note: "", tag: "300 NP · 每 3 小時" },
+    { id: "fishing", name: "釣釣漩渦 Fishing", url: N("/water/fishing.phtml"), note: "寵物釣魚技能會升級。", tag: "隨機冷卻" },
+    { id: "shrine", name: "科贊神龕 Coltzan's Shrine", url: N("/desert/shrine.phtml"), note: "有機會加能力值或給 NP。", tag: "每 13 小時" },
+    { id: "snowager", name: "大雪怪 Snowager", url: N("/winter/snowager.phtml"), note: "牠睡著時可以偷寶物，被噴到寵物會掉血。", tag: "6、14、22 點 NST" },
+    { id: "dice", name: "致命骰子 Deadly Dice", url: N("/worlds/deadlydice.phtml"), note: "只在 NST 凌晨 0–1 點開。", tag: "0–1 點 NST" },
+    { id: "symolhole", name: "地瓜鼠洞 Symol Hole", url: N("/medieval/symolhole.phtml"), note: "需要寵物玩伴。" },
+    { id: "turmaculus", name: "特馬庫拉斯 Turmaculus", url: N("/medieval/turmaculus.phtml"), note: "需要寵物玩伴，寵物玩伴有機會被吃掉。" },
+    { id: "academy", name: "海盜學院訓練 Swashbuckling Academy", url: N("/pirates/academy.phtml?type=status"), note: "課上完按 Complete Course 再報下一期。學費先翻保險箱的 Dubloon。", tag: "4～6 小時" },
+  ]},
+  { title: "小遊戲・解謎", items: [
+    { id: "puzzle", name: "每日謎題 Daily Puzzle", url: N("/community/"), note: "答案查 Jellyneo；重播題查 SunnyNeo 舊題庫。",
+      links: [["Jellyneo 答案", "https://www.jellyneo.net/?go=dailypuzzle"], ["SunnyNeo 題庫", "https://www.sunnyneo.com/dailypuzzle.php"]] },
+    { id: "lunar", name: "森空明月宮 Lunar Temple", url: N("/shenkuu/lunar/?show=puzzle"), note: "看月亮角度選對應的月相。" },
+    { id: "negg", name: "新奇蛋洞穴 Negg Cave", url: N("/shenkuu/neggcave/"), note: "照線索排 9 格符號和顏色。" },
+    { id: "crossword", name: "Faerie 填字 Crossword", url: N("/games/crossword/crossword.phtml"), note: "答案照題號順序填，5 分鐘內完成有 600 NP。",
+      links: [["Jellyneo 答案", "https://www.jellyneo.net/?go=faerie_crossword"]] },
+    { id: "kpop", name: "奇扣戳氣球 Kiko Pop", url: N("/worlds/kiko/kpop/"), note: "選難度後丟飛鏢。" },
+    { id: "grumpy", name: "暴躁老國王 Grumpy Old King", url: N("/medieval/grumpyking.phtml"), note: "講笑話給國王聽，一天 2 次。", tag: "一天 2 次" },
+    { id: "wiseking", name: "智慧老國王 Wise Old King", url: N("/medieval/wiseking.phtml"), note: "選一句格言，一天 1 次。" },
+    { id: "battledome", name: "競技場 Battledome", url: N("/dome/fight.phtml"), note: "I_am_you_are_me 打 Mr. Chuckles（Hard），一天上限 50,000 NP、15 個道具。", tag: "約 50 場" },
+    { id: "hwhunt", name: "鬧鬼森林尋寶 Haunted Woods Hunt", url: N("/halloween/haunted_woods_hunt.phtml"), note: "免費次數用完要 NC 道具。", hw: "+15 分 / 次，一天 2 次" },
+  ]},
+];
+
+const ALL_ITEMS = SECTIONS.flatMap((s) => s.items);
+const TOTAL = ALL_ITEMS.length;
+const KEY = "neo-daily-v1";
+const HW_KEY = "neo-daily-hw-only";
+const HW_END = "2026-10-31";
+
+function nstDate() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+const hwActive = () => nstDate() <= HW_END;
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || "{}");
+    return s.day === nstDate() ? s : { day: nstDate(), done: {} };
+  } catch { return { day: nstDate(), done: {} }; }
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+let state = load();
+let hwOnly = false;
+try { hwOnly = localStorage.getItem(HW_KEY) === "1"; } catch {}
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function itemHtml(it) {
+  const hw = hwActive() && it.hw;
+  return `
+    <div class="item${hw ? " is-hw" : ""}${state.done[it.id] ? " is-done" : ""}" data-id="${it.id}">
+      <input class="check" type="checkbox" id="c-${it.id}" aria-label="完成 ${esc(it.name)}"${state.done[it.id] ? " checked" : ""}>
+      <div class="body">
+        <span class="name"><a href="${it.url}" target="_blank" rel="noopener">${esc(it.name)}</a>${it.tag ? `<span class="tag">${esc(it.tag)}</span>` : ""}${hw ? `<span class="hw">萬聖節 ${esc(it.hw)}</span>` : ""}</span>
+        ${it.note ? `<span class="note">${esc(it.note)}</span>` : ""}
+        ${it.links ? `<div class="links">${it.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>` : ""}
+      </div>
+    </div>`;
+}
+
+function render() {
+  const active = hwActive();
+  document.getElementById("hw-banner").hidden = !active;
+  const filter = active && hwOnly;
+  const btn = document.getElementById("hw-only");
+  btn.setAttribute("aria-pressed", String(filter));
+  btn.textContent = filter ? "顯示全部項目" : "只看萬聖節積分項目";
+  document.getElementById("sections").innerHTML = SECTIONS.map((s) => {
+    const items = s.items.filter((it) => (!it.until || nstDate() <= it.until) && (!filter || it.hw));
+    if (!items.length) return "";
+    return `
+    <section>
+      <h2>${esc(s.title)}${s.hint ? ` <small>${esc(s.hint)}</small>` : ""}</h2>
+      <div class="list">${items.map(itemHtml).join("")}</div>
+    </section>`;
+  }).join("");
+  updateBar();
+}
+
+function updateBar() {
+  const n = ALL_ITEMS.filter((it) => state.done[it.id]).length;
+  document.getElementById("count").textContent = n === TOTAL ? `全部完成 ${n} / ${TOTAL}` : `${n} / ${TOTAL}`;
+  const fill = document.getElementById("fill");
+  fill.style.width = `${(n / TOTAL) * 100}%`;
+  fill.classList.toggle("full", n === TOTAL);
+}
+
+document.getElementById("sections").addEventListener("change", (e) => {
+  const item = e.target.closest(".item");
+  if (!item) return;
+  state.done[item.dataset.id] = e.target.checked;
+  item.classList.toggle("is-done", e.target.checked);
+  save(); updateBar();
+});
+document.getElementById("reset").addEventListener("click", () => { state = { day: nstDate(), done: {} }; save(); render(); });
+document.getElementById("hw-only").addEventListener("click", () => {
+  hwOnly = !hwOnly;
+  try { localStorage.setItem(HW_KEY, hwOnly ? "1" : "0"); } catch {}
+  render();
+});
+
+function tick() {
+  const t = new Intl.DateTimeFormat("zh-TW", { timeZone: "America/Los_Angeles", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
+  document.getElementById("clock").textContent = `NST ${t}`;
+  if (state.day !== nstDate()) { state = { day: nstDate(), done: {} }; save(); render(); }
+}
+const SHOP = (n) => `https://www.neopets.com/objects.phtml?type=shop&obj_type=${n}`;
+// Last number: the Jellyneo item category that shop sells.
+const TOP_SHOPS = [
+  ["Magical Bookshop", 7, "書，新手最常搶", 5],
+  ["Faerieland Bookshop", 38, "仙子書，單價高", 36],
+  ["Booktastic Books", 70, "書", 37],
+  ["Brightvale Books", 77, "書", 38],
+  ["Kauvara's Magic Shop", 2, "藥水、變色藥", 2],
+  ["Battle Magic", 9, "對戰武器", 15],
+  ["Collectable Card Shop", 8, "卡片", 39],
+  ["Neopian Post Office", 58, "郵票", 31],
+  ["The Bakery", 15, "麵包", 3],
+  ["Faerie Foods", 39, "仙子食物", 41],
+  ["Faerieland Petpets", 40, "寵物的寵物", 19],
+  ["Neopian Pharmacy", 13, "藥品", 6],
+];
+// Restockable items worth 5k–500k, priciest first; the ultra-rares above that almost never appear.
+const VALUE_LIST = (cat) => `https://items.jellyneo.net/search/?cat[]=${cat}&scat[]=308&scat_active=1&min_price=5000&max_price=500000&sort=5&sort_dir=desc&limit=75`;
+const ALL_SHOPS = [
+  ["對戰", [["Kauvara's Magic Shop", 2], ["Battle Magic", 9], ["Defence Magic", 10], ["Space Weaponry", 23], ["Space Armour", 24], ["Ice Crystal Shop", 36], ["Tyrannian Weaponry", 45], ["Sakhmet Battle Supplies", 54], ["Haunted Weaponry", 59], ["Kayla's Potion Shop", 73], ["The Scrollery", 78], ["Brightvale Armoury", 80], ["Brightvale Motery", 82], ["Royal Potionery", 83], ["Maractite Marvels", 87], ["Desert Arms", 91], ["Faerie Weapon Shop", 93], ["Illustrious Armoury", 94], ["Magical Marvels", 96], ["Wonderous Weaponry", 100]]],
+  ["書", [["Magical Bookshop", 7], ["Faerieland Bookshop", 38], ["Sutek's Scrolls", 51], ["Booktastic Books", 70], ["Brightvale Books", 77], ["Words of Antiquity", 92], ["Neovian Printing Press", 106], ["Moltaran Books", 114]]],
+  ["收藏", [["Collectable Card Shop", 8], ["Neopian Post Office", 58], ["Collectable Coins", 68], ["Collectable Sea Shells", 86]]],
+  ["食物", [["Fresh Foods", 1], ["Chocolate Factory", 14], ["The Bakery", 15], ["Health Foods", 16], ["Smoothie Store", 18], ["Tropical Food", 20], ["Grundos Cafe", 22], ["Spooky Food", 30], ["The Coffee Cave", 34], ["Slushie Shop", 35], ["SHIFS Shop", 37], ["Faerie Foods", 39], ["Tyrannian Foods", 42], ["Hubert's Hot Dogs", 46], ["Pizzaroo", 47], ["Lost Desert Foods", 49], ["Merifoods", 56], ["Jelly Foods", 62], ["Refreshments", 63], ["Kiko Lake Treats", 66], ["Cafe Kreludor", 72], ["Brightvale Fruits", 81], ["Qasalan Delights", 90], ["Exquisite Ambrosia", 95], ["Exotic Foods", 101], ["The Crumpetmonger", 105], ["Molten Morsels", 112]]],
+  ["寵物的寵物", [["Neopian Petpet Shop", 25], ["Robo-Petpet Shop", 26], ["The Rock Pool", 27], ["Spooky Petpets", 31], ["Faerieland Petpets", 40], ["Tyrannian Petpets", 44], ["Peopatra's Petpets", 50], ["Ye Olde Petpets", 57], ["Wintery Petpets", 61], ["Maraquan Petpets", 88], ["Geraptiku Petpets", 89], ["Legendary Petpets", 97], ["Fanciful Fauna", 103], ["Moltaran Petpets", 113]]],
+  ["藥品", [["Neopian Pharmacy", 13], ["Lost Desert Medicine", 85], ["Remarkable Restoratives", 102]]],
+  ["玩具", [["Toy Shop", 3], ["Usukiland", 48], ["Darigan Toys", 74], ["Plushie Palace", 98], ["Springy Things", 116]]],
+  ["服裝", [["Unis Clothing Shop", 4], ["Prigpants & Swolthy, Tailors", 107], ["Mystical Surroundings", 108], ["Cog's Togs", 111], ["Ugga Shinies", 117]]],
+  ["家具、園藝", [["Neopian Garden Centre", 12], ["Neopian Furniture", 41], ["Tyrannian Furniture", 43], ["Osiri's Pottery", 55], ["Spooky Furniture", 60], ["Kiko Lake Carpentry", 67], ["Petpet Supplies", 69], ["Kreludan Homes", 71], ["Faerie Furniture", 75], ["Roo Island Souvenirs", 76], ["Brightvale Glaziers", 79], ["Chesterdrawers' Antiques", 104], ["Lampwyck's Lights Fantastic", 110]]],
+  ["其他", [["Grooming Parlour", 5], ["Neopian Gift Shop", 17], ["Tiki Tack", 21], ["Neopian School Supplies", 53], ["Neopian Music Shop", 84]]],
+];
+const SPECIAL_SHOPS = [
+  ["Igloo Garage Sale 圓頂屋大甩賣", "https://www.neopets.com/winter/igloo.phtml"],
+  ["Almost Abandoned Attic", "https://www.neopets.com/halloween/garage.phtml"],
+  ["Tarla's Shop of Mystery 塔拉的神秘之店", "https://www.neopets.com/winter/shopofmystery.phtml"],
+  ["Hidden Tower", "https://www.neopets.com/faerieland/hiddentower938.phtml"],
+  ["Smugglers Cove", "https://www.neopets.com/pirates/smugglerscove.phtml"],
+  ["Krawk Island Nippers", "https://www.neopets.com/pirates/piratepets.phtml"],
+  ["The Neggery", "https://www.neopets.com/winter/neggery.phtml"],
+  ["Ever Stocked General Store", "https://www.neopets.com/generalstore.phtml"],
+];
+const chip = (name, url) => `<a href="${url}" target="_blank" rel="noopener">${esc(name)}</a>`;
+document.getElementById("shops-top").innerHTML = TOP_SHOPS.map(([n, id, d, cat]) => `
+  <div class="shopcard">
+    <a class="shopname" href="${SHOP(id)}" target="_blank" rel="noopener">${esc(n)}</a>
+    <span>${esc(d)}</span>
+    <a class="value" href="${VALUE_LIST(cat)}" target="_blank" rel="noopener">值錢清單 →</a>
+  </div>`).join("");
+document.getElementById("shops-all").innerHTML =
+  ALL_SHOPS.map(([cat, list]) => `<h3>${esc(cat)}</h3><div class="links">${list.map(([n, id]) => chip(n, SHOP(id))).join("")}</div>`).join("") +
+  `<h3>特殊商店</h3><div class="links">${SPECIAL_SHOPS.map(([n, u]) => chip(n, u)).join("")}</div>`;
+
+const CLOTHES_SHOPS = [
+  ["Uni's Clothing Shop", 4, "尼奧市中心，衣服、帽子、配件，種類最多"],
+  ["Prigpants & Swolthy, Tailors", 107, "尼奧維亞，西裝、禮服、復古服飾"],
+  ["Mystical Surroundings", 108, "背景，所有寵物都能用"],
+  ["Cog's Togs", 111, "莫塔拉，齒輪、蒸汽龐克風服飾"],
+  ["Ugga Shinies", 117, "暴虐大地，前景和原始風飾品"],
+];
+const CLOTHES_EXTRA = [
+  ["Brightvale Fruits", 81, "偶爾有 Chia 專用翅膀"],
+  ["Tiki Tack", 21, "神秘島，偶爾有草鞋等穿戴品"],
+];
+const card = ([n, id, d]) => `<a href="${SHOP(id)}" target="_blank" rel="noopener">${esc(n)}<span>${esc(d)}</span></a>`;
+document.getElementById("clothes-shops").innerHTML = CLOTHES_SHOPS.map(card).join("");
+document.getElementById("clothes-extra").innerHTML = CLOTHES_EXTRA.map(card).join("");
+
+const TAB_KEY = "neo-daily-tab";
+const TABS = ["daily", "sites", "clothes"];
+function showTab(name) {
+  for (const t of TABS) {
+    document.getElementById(`tab-${t}`).hidden = t !== name;
+    document.getElementById(`t-${t}`).setAttribute("aria-selected", String(t === name));
+  }
+  try { localStorage.setItem(TAB_KEY, name); } catch {}
+}
+document.querySelector(".tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button[role=tab]");
+  if (b) showTab(b.id.slice(2));
+});
+try { const t = localStorage.getItem(TAB_KEY); if (TABS.includes(t)) showTab(t); } catch {}
+
+render(); tick(); setInterval(tick, 30000);
+</script>
+</body>
+</html>
