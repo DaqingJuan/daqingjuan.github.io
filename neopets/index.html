@@ -265,6 +265,12 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
       <div class="tools" id="clothes-extra"></div>
     </section>
     <section>
+      <h2>免費二手店 <small>玩家捐的衣服，免費拿</small></h2>
+      <div class="tools">
+        <a href="https://www.neopets.com/thriftshoppe/index.phtml" target="_blank" rel="noopener">二手店 Second-Hand Shoppe<span>別人捐的穿戴品，一件都不用錢，每天會變</span></a>
+      </div>
+    </section>
+    <section>
       <h2>買衣服小提醒</h2>
       <ul class="memo">
         <li>衣服要寵物「種族」合適才能穿。點商品時，名稱有寫種族的（例如 Chia Wings）只有那個種族能穿；背景、前景所有寵物都能用。</li>
@@ -328,7 +334,6 @@ const SECTIONS = [
     { id: "expellibox", name: "聖甲蟲移除器 Qasalan Expellibox", url: "https://ncmall.neopets.com/mall/shop.phtml?page=giveaway", note: "按 Start Game 讓聖甲蟲掉下去，要在 Chrome 用 Ruffle 玩。" },
     { id: "marrow", name: "猜葫蘆有多重 Guess the Marrow", url: N("/medieval/guessmarrow.phtml"), note: "比賽開始時間不固定，沒開就晚點再來。" },
     { id: "apple", name: "蘋果咬咬 Apple Bobbing", url: N("/halloween/applebobbing.phtml"), note: "可能弄丟背包裡的東西，貴重物品先放保險箱。", hw: "+10 分 / 天" },
-    { id: "forgottenshore", name: "被遺忘的海灘 Forgotten Shore", url: N("/pirates/forgottenshore.phtml"), note: "要先拼好地圖才能進去。" },
     { id: "caverns", name: "精靈洞穴 Faerie Caverns", url: N("/faerieland/caverns/index.phtml"), note: "一次 400 NP，隨機拿 NP 或物品。", jackpot: "Faerie Caverns Stamp（約 1.6 億）、Patamoose（約 2,000 萬）" },
     { id: "coconut", name: "擊落椰子果 Coconut Shy", url: N("/halloween/coconutshy.phtml"), note: "要花 NP 丟球。" },
     { id: "wishing", name: "許願井 Wishing Well", url: N("/wishing.phtml"), note: "投 NP 許願想要的物品。", jackpot: "可指定的郵票類，Holographic Usukicon Stamp（約 6,500 萬）等" },
@@ -360,11 +365,12 @@ const SECTIONS = [
     { id: "turmaculus", name: "特馬庫拉斯 Turmaculus", url: N("/medieval/turmaculus.phtml"), note: "需要寵物玩伴，寵物玩伴有機會被吃掉。" },
     { id: "academy", name: "海盜學院訓練 Swashbuckling Academy", url: N("/pirates/academy.phtml?type=status"), note: "課上完按 Complete Course 再報下一期。學費先翻保險箱的 Dubloon。", tag: "4～6 小時" },
   ]},
-  { title: "實驗室射線", hint: "一天各一次，結果隨機", items: [
+  { title: "實驗室射線與藏寶地圖", hint: "都要先兌換藏寶圖才能進去，一天各一次", items: [
     { id: "labray", name: "神秘實驗室射線 Secret Laboratory", url: N("/lab.phtml"), note: "選寵物照一次射線，可能變色、變種族、變性別，或加減能力值。不想被改造的寵物不要選。",
       links: [["藏寶圖兌換（還沒開通時）", N("/games/treasure.phtml")]] },
     { id: "petpetlab", name: "寵物玩伴實驗室射線 Petpet Lab", url: N("/petpetlab.phtml"), note: "選一隻寵物玩伴照射線，可能變色、變種類或改名字。",
       links: [["藏寶圖兌換（還沒開通時）", N("/games/treasure.phtml")]] },
+    { id: "forgottenshore", name: "被遺忘的海灘 Forgotten Shore", url: N("/pirates/forgottenshore.phtml"), note: "要先拼好地圖才能進去。" },
   ]},
   { title: "小遊戲・解謎", items: [
     { id: "puzzle", name: "每日謎題 Daily Puzzle", url: N("/community/"), note: "答案查 Jellyneo；重播題查 SunnyNeo 舊題庫。",
