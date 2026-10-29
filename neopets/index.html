@@ -185,7 +185,6 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
       <a href="https://www.neopets.com/inventory.phtml" target="_blank" rel="noopener">背包<span>Inventory</span></a>
       <a href="https://www.neopets.com/safetydeposit.phtml" target="_blank" rel="noopener">保險箱<span>Safety Deposit Box</span></a>
       <a href="https://www.neopets.com/hospital.phtml" target="_blank" rel="noopener">醫院<span>寵物生病時查解藥</span></a>
-      <a href="https://www.neopets.com/games/treasure.phtml" target="_blank" rel="noopener">藏寶圖兌換<span>神秘實驗室、寵物玩伴實驗室</span></a>
       <a href="https://www.neopets.com/magma/index.phtml" target="_blank" rel="noopener">莫塔拉城 Moltara<span>找齒輪</span></a>
     </div>
   </section>
@@ -306,6 +305,7 @@ const SECTIONS = [
     { id: "esophagor", name: "埃索妖怪 Esophagor", url: N("/halloween/esophagor.phtml"), note: "餵它指定食物。食物圖示右上角可以換，每樣有 3 個選項輪流。", jackpot: "Earth Faerie Doll（約 2,000 萬）", hw: "+15 分 / 次，無上限" },
     { id: "witch", name: "女巫塔 Edna", url: N("/halloween/witchtower.phtml"), note: "找 3 樣材料，常常很貴，划不來就跳過。", hw: "+10 分 / 次，一天 10 次" },
     { id: "kitchen", name: "神秘島廚房 Kitchen Quest", url: N("/island/kitchen.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Kitchen Quest Cookbook（約 1,950 萬）、Earth Faerie Doll（約 2,000 萬）" },
+    { id: "jhudora", name: "黑暗精靈 Jhudora", url: N("/faerieland/darkfaerie.phtml"), note: "接任務後約 16 分鐘內交指定道具。沒交或時間到會掉回第 1 級，所以先查好價格再接。和 Illusen 共用冷卻。", jackpot: "第 47 級 Jhudoras Coin（約 2 億）、第 50 級 Jhudoras Scimitar of Secrets（約 1.2 億）、第 44 級 Jhudoras Crystals（約 520 萬）", tag: "每 12 小時" },
     { id: "snowfaerie", name: "雪精靈 Snow Faerie", url: N("/winter/snowfaerie.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Taelia Coin（約 2 億）、冰淇淋機優惠券（約 2,300 萬～2,500 萬）" },
   ]},
   { title: "免費領取", hint: "點一下就拿，一天一次", items: [
@@ -360,6 +360,12 @@ const SECTIONS = [
     { id: "turmaculus", name: "特馬庫拉斯 Turmaculus", url: N("/medieval/turmaculus.phtml"), note: "需要寵物玩伴，寵物玩伴有機會被吃掉。" },
     { id: "academy", name: "海盜學院訓練 Swashbuckling Academy", url: N("/pirates/academy.phtml?type=status"), note: "課上完按 Complete Course 再報下一期。學費先翻保險箱的 Dubloon。", tag: "4～6 小時" },
   ]},
+  { title: "實驗室射線", hint: "一天各一次，結果隨機", items: [
+    { id: "labray", name: "神秘實驗室射線 Secret Laboratory", url: N("/lab.phtml"), note: "選寵物照一次射線，可能變色、變種族、變性別，或加減能力值。不想被改造的寵物不要選。",
+      links: [["藏寶圖兌換（還沒開通時）", N("/games/treasure.phtml")]] },
+    { id: "petpetlab", name: "寵物玩伴實驗室射線 Petpet Lab", url: N("/petpetlab.phtml"), note: "選一隻寵物玩伴照射線，可能變色、變種類或改名字。",
+      links: [["藏寶圖兌換（還沒開通時）", N("/games/treasure.phtml")]] },
+  ]},
   { title: "小遊戲・解謎", items: [
     { id: "puzzle", name: "每日謎題 Daily Puzzle", url: N("/community/"), note: "答案查 Jellyneo；重播題查 SunnyNeo 舊題庫。",
       links: [["Jellyneo 答案", "https://www.jellyneo.net/?go=dailypuzzle"], ["SunnyNeo 題庫", "https://www.sunnyneo.com/dailypuzzle.php"]] },
@@ -367,6 +373,7 @@ const SECTIONS = [
     { id: "negg", name: "新奇蛋洞穴 Negg Cave", url: N("/shenkuu/neggcave/"), note: "照線索排 9 格符號和顏色。" },
     { id: "crossword", name: "Faerie 填字 Crossword", url: N("/games/crossword/crossword.phtml"), note: "答案照題號順序填，5 分鐘內完成有 600 NP。",
       links: [["Jellyneo 答案", "https://www.jellyneo.net/?go=faerie_crossword"]] },
+    { id: "lostdark", name: "迷失黑暗 Lost in the Dark", url: N("/games/lostinthedark/"), note: "一天進去一次。", tag: "一天一次" },
     { id: "kpop", name: "奇扣戳氣球 Kiko Pop", url: N("/worlds/kiko/kpop/"), note: "選難度後丟飛鏢。", jackpot: "Holographic Usukicon Stamp（約 6,500 萬）、Flaming Meerca Stamp（約 6,000 萬）" },
     { id: "grumpy", name: "暴躁老國王 Grumpy Old King", url: N("/medieval/grumpyking.phtml"), note: "講笑話給國王聽，一天 2 次。", jackpot: "Skarl Royal Crown、King Skarl Quiguki Plushie（各約 2,000 萬）", tag: "一天 2 次" },
     { id: "wiseking", name: "智慧老國王 Wise Old King", url: N("/medieval/wiseking.phtml"), note: "選一句格言，一天 1 次。" },
