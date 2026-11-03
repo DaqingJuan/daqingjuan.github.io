@@ -100,16 +100,22 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
 .site ul { margin: 0; padding-left: 1.1em; font-size: .88rem; display: grid; gap: 2px; }
 .memo { background: var(--panel); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 16px; margin: 0; display: grid; gap: 6px; font-size: .88rem; }
 .memo li { margin-left: 1.1em; }
-.shopcard { display: grid; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-.shopcard span { font-size: .8rem; color: var(--muted); }
-.shopcard .shopname { color: var(--ink); text-decoration: none; font-weight: 700; }
-.shopcard .shopname:hover { color: var(--link); text-decoration: underline; }
-.shopcard .value { font-size: .8rem; color: var(--link); text-decoration: none; margin-top: 4px; }
-.shopcard .value:hover { text-decoration: underline; }
-.all-shops { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
-.all-shops summary { cursor: pointer; font-weight: 700; }
-.all-shops h3 { font-size: .85rem; color: var(--muted); margin: 14px 0 6px; font-weight: 700; letter-spacing: .04em; }
-.all-shops .links { margin: 0; }
+.finder { display: grid; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.finder label { font-size: .8rem; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.finder input { font: inherit; width: 100%; min-width: 0; box-sizing: border-box; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.finder input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.finder .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .finder .row { grid-template-columns: 1fr; } }
+.finder .field { display: grid; gap: 4px; min-width: 0; }
+.finder .lookup { font-size: .82rem; color: var(--link); text-decoration: none; }
+.finder .lookup[aria-disabled="true"] { color: var(--muted); pointer-events: none; }
+.shopgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.shop { display: grid; gap: 2px; align-content: start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--ink); text-decoration: none; }
+.shop:hover { border-color: var(--link); }
+.shop b { font-weight: 700; }
+.shop .en { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+.shop .desc { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+.empty { color: var(--muted); font-size: .88rem; margin: 0; }
 .reset { justify-self: start; font: inherit; font-size: .85rem; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
 .reset:hover { color: var(--ink); border-color: var(--muted); }
 .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); overflow-x: auto; }
@@ -126,11 +132,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
     <p class="sub">主帳號 tony22656176 · 勾選會在尼奧時間（NST）午夜自動清空</p>
   </header>
 
-  <nav class="tabs" role="tablist">
-    <button type="button" role="tab" id="t-daily" aria-controls="tab-daily" aria-selected="true">每日清單</button>
-    <button type="button" role="tab" id="t-sites" aria-controls="tab-sites" aria-selected="false">相關網站</button>
-    <button type="button" role="tab" id="t-clothes" aria-controls="tab-clothes" aria-selected="false">服飾商店</button>
-  </nav>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
 
   <div class="panel" id="tab-daily" role="tabpanel" aria-labelledby="t-daily">
   <div class="hw-banner" id="hw-banner">
@@ -159,23 +161,6 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
     <div class="tools">
       <a href="https://www.neopets.com/freebies/index.phtml" target="_blank" rel="noopener">尼奧寵物好料 Freebies<span>每月領 2,000 NP，每隻寵物都有食物</span></a>
     </div>
-  </section>
-
-  <section>
-    <h2>NPC 商店搶貨 <small>你自己來，要手快</small></h2>
-    <ul class="memo">
-      <li>商店每隔幾分鐘會補貨，補到稀有的東西時，馬上點下去買再轉賣就能賺錢。</li>
-      <li>不知道哪個值錢：先只挑一家店，點卡片上的「值錢清單」，裡面是那家店會補、市價 5,000～500,000 的東西，從最貴的排起。每天記 10 個名字就好。</li>
-      <li>一般來說：店裡價錢特別高、而且只剩 1～2 個的，通常是稀有貨。</li>
-      <li>買之前先用 Shop Wizard 或 itemdb 查行情，差價夠大才買。</li>
-      <li>買的時候會進殺價頁，出價低一點再慢慢加；最後要點寵物圖片才能成交（防機器人）。</li>
-      <li>不要瘋狂按重新整理，太快會被暫時禁止買東西。</li>
-    </ul>
-    <div class="tools" id="shops-top"></div>
-    <details class="all-shops">
-      <summary>全部 NPC 商店</summary>
-      <div id="shops-all"></div>
-    </details>
   </section>
 
   <section>
@@ -255,15 +240,9 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
     </section>
   </div>
 
-  <div class="panel" id="tab-clothes" role="tabpanel" aria-labelledby="t-clothes" hidden>
-    <section>
-      <h2>NPC 服飾店 <small>全部 5 間，用 NP 買得到的衣服都在這</small></h2>
-      <div class="tools" id="clothes-shops"></div>
-    </section>
-    <section>
-      <h2>偶爾有穿戴品 <small>不是服飾店，但有時會補到</small></h2>
-      <div class="tools" id="clothes-extra"></div>
-    </section>
+  <div id="shop-panels"></div>
+
+  <div id="clothes-static" hidden>
     <section>
       <h2>免費二手店 <small>玩家捐的衣服，免費拿</small></h2>
       <div class="tools">
@@ -337,7 +316,7 @@ const SECTIONS = [
     { id: "caverns", name: "精靈洞穴 Faerie Caverns", url: N("/faerieland/caverns/index.phtml"), note: "一次 400 NP，隨機拿 NP 或物品。", jackpot: "Faerie Caverns Stamp（約 1.6 億）、Patamoose（約 2,000 萬）" },
     { id: "coconut", name: "擊落椰子果 Coconut Shy", url: N("/halloween/coconutshy.phtml"), note: "要花 NP 丟球。" },
     { id: "wishing", name: "許願井 Wishing Well", url: N("/wishing.phtml"), note: "投 NP 許願想要的物品。", jackpot: "可指定的郵票類，Holographic Usukicon Stamp（約 6,500 萬）等" },
-    { id: "lottery", name: "樂透 Lottery", url: N("/games/lottery.phtml"), note: "一天一次。" },
+    { id: "lottery", name: "樂透 Lottery", url: N("/games/lottery.phtml"), note: "每天隨機挑一組 6 個號碼（1～30）買一張，每天 4am NST 開獎。中任何獎就有獎盃。", tag: "100 NP" },
   ]},
   { title: "轉輪類", hint: "轉盤可能吃掉背包裡的東西，先放保險箱", items: [
     { id: "misfortune", name: "厄運之輪 Wheel of Misfortune", url: N("/halloween/wheel/index.phtml"), note: "活動期間每天有一次免費轉。", tag: "150 NP · 每 2 小時", hw: "+5 分 / 次" },
@@ -472,73 +451,207 @@ function tick() {
   if (state.day !== nstDate()) { state = { day: nstDate(), done: {} }; save(); render(); }
 }
 const SHOP = (n) => `https://www.neopets.com/objects.phtml?type=shop&obj_type=${n}`;
-// Last number: the Jellyneo item category that shop sells.
-const TOP_SHOPS = [
-  ["Magical Bookshop", 7, "書，新手最常搶", 5],
-  ["Faerieland Bookshop", 38, "仙子書，單價高", 36],
-  ["Booktastic Books", 70, "書", 37],
-  ["Brightvale Books", 77, "書", 38],
-  ["Kauvara's Magic Shop", 2, "藥水、變色藥", 2],
-  ["Battle Magic", 9, "對戰武器", 15],
-  ["Collectable Card Shop", 8, "卡片", 39],
-  ["Neopian Post Office", 58, "郵票", 31],
-  ["The Bakery", 15, "麵包", 3],
-  ["Faerie Foods", 39, "仙子食物", 41],
-  ["Faerieland Petpets", 40, "寵物的寵物", 19],
-  ["Neopian Pharmacy", 13, "藥品", 6],
+// Each shop: [English name, 中文名, shop id or full URL, what it sells].
+const SHOP_CATS = [
+  { id: "clothes", tab: "NPC服飾店", title: "NPC 服飾店", hint: "用 NP 買得到的衣服、背景都在這", shops: [
+    ["Uni's Clothing Shop", "優尼服飾店", 4, "尼奧市中心，衣服、帽子、配件，種類最多"],
+    ["Prigpants & Swolthy, Tailors", "普里格與斯沃西裁縫店", 107, "尼奧維亞，西裝、禮服、復古服飾"],
+    ["Mystical Surroundings", "神秘背景店", 108, "背景，所有寵物都能用"],
+    ["Cog's Togs", "齒輪服飾", 111, "莫塔拉，齒輪、蒸汽龐克風服飾"],
+    ["Ugga Shinies", "烏加亮晶晶", 117, "暴虐大地，前景和原始風飾品"],
+  ], extraTitle: "偶爾有穿戴品", extraHint: "不是服飾店，但有時會補到", extra: [
+    ["Brightvale Fruits", "亮谷水果店", 81, "偶爾有 Chia 專用翅膀"],
+    ["Tiki Tack", "提基小舖", 21, "神秘島，偶爾有草鞋等穿戴品"],
+  ]},
+  { id: "battle", tab: "NPC武器店", title: "NPC 武器店", hint: "競技場用的武器、防具、對戰藥水", shops: [
+    ["Battle Magic", "戰鬥魔法", 9, "一般攻擊武器，新手入門武器多"],
+    ["Defence Magic", "防禦魔法", 10, "盾牌、防禦道具"],
+    ["Kauvara's Magic Shop", "卡瓦拉魔法店", 2, "魔法藥水、變色藥水、變身藥水"],
+    ["Kayla's Potion Shop", "凱拉藥水店", 73, "對戰補血藥水和各種藥水"],
+    ["Royal Potionery", "皇家藥水坊", 83, "亮谷的高級藥水"],
+    ["The Scrollery", "卷軸店", 78, "對戰卷軸，例如凍結卷軸"],
+    ["Brightvale Motery", "亮谷魔法微粒店", 82, "Motes 魔法微粒，丟出去造成元素傷害"],
+    ["Brightvale Armoury", "亮谷軍械庫", 80, "中世紀盔甲、盾牌"],
+    ["Illustrious Armoury", "輝煌軍械庫", 94, "梅里多的盔甲、劍"],
+    ["Space Weaponry", "太空武器店", 23, "太空站的光束槍、雷射武器"],
+    ["Space Armour", "太空盔甲店", 24, "太空主題防具"],
+    ["Ice Crystal Shop", "冰晶商店", 36, "恐怖山的冰屬性武器、冰晶"],
+    ["Tyrannian Weaponry", "暴虐大地武器店", 45, "棍棒、石器等原始武器"],
+    ["Sakhmet Battle Supplies", "沙克梅特戰鬥補給", 54, "失落沙漠的劍、弓、卷軸"],
+    ["Desert Arms", "沙漠兵器", 91, "卡薩拉的沙漠武器"],
+    ["Haunted Weaponry", "鬧鬼武器店", 59, "鬧鬼森林的黑暗系武器"],
+    ["Maractite Marvels", "馬拉克石奇物", 87, "馬拉昆海底的馬拉克石武器"],
+    ["Faerie Weapon Shop", "精靈武器店", 93, "精靈主題武器、仙子塵"],
+    ["Magical Marvels", "魔法奇物", 96, "各式魔法對戰道具"],
+    ["Wonderous Weaponry", "奇妙武器店", 100, "造型特殊的武器"],
+  ]},
+  { id: "books", tab: "NPC書店", title: "NPC 書店", hint: "讀給寵物聽可以加智力，任務也常要書", shops: [
+    ["Magical Bookshop", "魔法書店", 7, "尼奧市中心的一般書，最便宜"],
+    ["Faerieland Bookshop", "精靈書店", 38, "精靈主題書，單價較高"],
+    ["Booktastic Books", "書香太空書店", 70, "科硫墩月球的科幻書"],
+    ["Brightvale Books", "亮谷書店", 77, "中世紀書，加的智力較多"],
+    ["Sutek's Scrolls", "蘇泰克卷軸", 51, "失落沙漠的卷軸書"],
+    ["Words of Antiquity", "古語書坊", 92, "古代主題書"],
+    ["Neovian Printing Press", "尼奧維亞印刷坊", 106, "尼奧維亞的書報"],
+    ["Moltaran Books", "莫塔拉書店", 114, "莫塔拉地底城的書"],
+  ]},
+  { id: "food", tab: "NPC食物店", title: "NPC 食物店", hint: "寵物肚子餓、任務要食物時來這", shops: [
+    ["Fresh Foods", "新鮮食品", 1, "尼奧市中心，一般食物"],
+    ["The Bakery", "麵包店", 15, "麵包、蛋糕、餅乾"],
+    ["Chocolate Factory", "巧克力工廠", 14, "巧克力、糖果"],
+    ["Health Foods", "健康食品", 16, "蔬菜、健康料理"],
+    ["Smoothie Store", "冰沙店", 18, "冰沙飲料"],
+    ["Slushie Shop", "冰沙冰品店", 35, "Slushie 冰品"],
+    ["Refreshments", "飲料店", 63, "各式飲料"],
+    ["The Coffee Cave", "咖啡洞", 34, "咖啡、熱飲"],
+    ["Hubert's Hot Dogs", "休伯特熱狗", 46, "熱狗"],
+    ["Pizzaroo", "披薩袋鼠", 47, "披薩"],
+    ["Grundos Cafe", "葛藍多咖啡館", 22, "太空站的太空食物"],
+    ["Cafe Kreludor", "科硫墩咖啡", 72, "月球食物"],
+    ["Tropical Food", "熱帶食品", 20, "神秘島的水果、熱帶料理"],
+    ["Spooky Food", "恐怖食品", 30, "鬧鬼森林的怪食物，萬聖節任務常用"],
+    ["SHIFS Shop", "冰雪歡樂店", 37, "恐怖山的冰品"],
+    ["Faerie Foods", "精靈食品", 39, "精靈主題食物"],
+    ["Tyrannian Foods", "暴虐大地食品", 42, "原始風烤肉、恐龍蛋"],
+    ["Lost Desert Foods", "失落沙漠食品", 49, "沙漠料理"],
+    ["Qasalan Delights", "卡薩蘭美食", 90, "卡薩拉料理"],
+    ["Merifoods", "梅里食品", 56, "梅里多的中世紀料理"],
+    ["Brightvale Fruits", "亮谷水果店", 81, "水果"],
+    ["The Crumpetmonger", "鬆餅小販", 105, "尼奧維亞的英式點心"],
+    ["Jelly Foods", "果凍食品", 62, "果凍世界的各種果凍"],
+    ["Kiko Lake Treats", "奇扣湖點心", 66, "奇扣湖的甜點"],
+    ["Exquisite Ambrosia", "精緻仙饌", 95, "高級精緻料理"],
+    ["Exotic Foods", "異國食品", 101, "少見的異國料理"],
+    ["Molten Morsels", "熔岩小點", 112, "莫塔拉的熔岩主題食物"],
+  ]},
+  { id: "petpets", tab: "NPC寵物玩伴店", title: "NPC 寵物玩伴店", hint: "Petpet 和 Petpetpet，Grave Danger、Symol Hole 都要用", shops: [
+    ["Neopian Petpet Shop", "尼奧寵物玩伴店", 25, "尼奧市中心，一般寵物玩伴"],
+    ["Petpet Supplies", "寵物玩伴用品", 69, "寵物玩伴的食物、玩具"],
+    ["Robo-Petpet Shop", "機器寵物玩伴店", 26, "機器人造型寵物玩伴"],
+    ["The Rock Pool", "岩池", 27, "馬拉昆的水生寵物玩伴"],
+    ["Spooky Petpets", "恐怖寵物玩伴", 31, "鬧鬼森林的寵物玩伴"],
+    ["Faerieland Petpets", "精靈寵物玩伴", 40, "精靈主題寵物玩伴"],
+    ["Tyrannian Petpets", "暴虐大地寵物玩伴", 44, "恐龍、原始風寵物玩伴"],
+    ["Peopatra's Petpets", "皮歐帕翠拉寵物玩伴", 50, "失落沙漠的寵物玩伴"],
+    ["Ye Olde Petpets", "中世紀寵物玩伴", 57, "梅里多的寵物玩伴"],
+    ["Wintery Petpets", "冬季寵物玩伴", 61, "恐怖山的冰雪寵物玩伴"],
+    ["Maraquan Petpets", "馬拉昆寵物玩伴", 88, "海底寵物玩伴"],
+    ["Geraptiku Petpets", "葛拉提酷寵物玩伴", 89, "神秘島古城的寵物玩伴"],
+    ["Legendary Petpets", "傳說寵物玩伴", 97, "傳說中的稀有寵物玩伴"],
+    ["Fanciful Fauna", "奇幻動物", 103, "造型奇特的寵物玩伴"],
+    ["Moltaran Petpets", "莫塔拉寵物玩伴", 113, "莫塔拉的熔岩寵物玩伴"],
+  ]},
+  { id: "medicine", tab: "NPC藥品店", title: "NPC 藥品店", hint: "寵物生病時買解藥，先到醫院查要哪一種", shops: [
+    ["Neopian Pharmacy", "尼奧藥局", 13, "一般藥品，治大部分疾病"],
+    ["Lost Desert Medicine", "失落沙漠藥房", 85, "沙漠草藥和藥品"],
+    ["Remarkable Restoratives", "神奇復原藥舖", 102, "比較少見的藥品"],
+    ["Grooming Parlour", "美容院", 5, "梳子、洗髮精，任務的「梳毛」用這裡的"],
+  ]},
+  { id: "toys", tab: "NPC玩具店", title: "NPC 玩具店", hint: "玩具讓寵物開心，任務也會用到", shops: [
+    ["Toy Shop", "玩具店", 3, "尼奧市中心的一般玩具"],
+    ["Usukiland", "優速奇樂園", 48, "Usuki 娃娃、娃娃屋"],
+    ["Plushie Palace", "絨毛玩偶宮", 98, "各寵物的絨毛玩偶"],
+    ["Darigan Toys", "達里根玩具", 74, "達里根城堡的玩具"],
+    ["Springy Things", "彈簧玩具", 116, "彈簧、彈跳類玩具"],
+    ["Neopian Music Shop", "尼奧樂器行", 84, "樂器"],
+  ]},
+  { id: "furniture", tab: "NPC家具店", title: "NPC 家具店", hint: "布置尼奧家園的家具和園藝", shops: [
+    ["Neopian Furniture", "尼奧家具", 41, "一般家具"],
+    ["Neopian Garden Centre", "尼奧園藝中心", 12, "花草、園藝用品"],
+    ["Tyrannian Furniture", "暴虐大地家具", 43, "原始風石頭家具"],
+    ["Osiri's Pottery", "歐西里陶器", 55, "失落沙漠的陶器"],
+    ["Spooky Furniture", "恐怖家具", 60, "鬧鬼森林風家具"],
+    ["Kiko Lake Carpentry", "奇扣湖木工", 67, "木製家具"],
+    ["Kreludan Homes", "科硫墩居家", 71, "月球太空風家具"],
+    ["Faerie Furniture", "精靈家具", 75, "精靈風家具"],
+    ["Roo Island Souvenirs", "袋鼠島紀念品", 76, "袋鼠島主題擺設"],
+    ["Brightvale Glaziers", "亮谷玻璃坊", 79, "窗戶、玻璃擺設"],
+    ["Chesterdrawers' Antiques", "切斯特古董店", 104, "古董家具"],
+    ["Lampwyck's Lights Fantastic", "蘭維克奇幻燈飾", 110, "燈具"],
+  ]},
+  { id: "collect", tab: "NPC收藏店", title: "NPC 收藏店", hint: "郵票、卡片、硬幣，收集類", shops: [
+    ["Neopian Post Office", "尼奧郵局", 58, "郵票，集郵冊用"],
+    ["Collectable Card Shop", "收藏卡片店", 8, "尼奧卡（Neodeck）"],
+    ["Collectable Coins", "收藏硬幣", 68, "收藏用硬幣"],
+    ["Collectable Sea Shells", "收藏貝殼", 86, "收藏用貝殼"],
+  ]},
+  { id: "other", tab: "其他商店", title: "其他商店", hint: "雜貨和特殊商店", shops: [
+    ["Neopian Gift Shop", "尼奧禮品店", 17, "禮物、包裝"],
+    ["Neopian School Supplies", "尼奧文具店", 53, "文具、學校用品"],
+    ["Tiki Tack", "提基小舖", 21, "神秘島紀念品"],
+    ["Igloo Garage Sale", "圓頂屋大甩賣", "https://www.neopets.com/winter/igloo.phtml", "恐怖山，便宜的二手雜貨，一次限買幾樣"],
+    ["Tarla's Shop of Mystery", "塔拉的神秘之店", "https://www.neopets.com/winter/shopofmystery.phtml", "隨機出現的神秘商品"],
+    ["Almost Abandoned Attic", "幾乎廢棄的閣樓", "https://www.neopets.com/halloween/garage.phtml", "鬧鬼森林，偶爾有退休稀有品"],
+    ["Hidden Tower", "隱密塔", "https://www.neopets.com/faerieland/hiddentower938.phtml", "固定高價的稀有品，通常比玩家市場貴"],
+    ["Smugglers Cove", "走私者洞穴", "https://www.neopets.com/pirates/smugglerscove.phtml", "海盜島的高價稀有品"],
+    ["Krawk Island Nippers", "海盜島寵物玩伴", "https://www.neopets.com/pirates/piratepets.phtml", "海盜主題寵物玩伴"],
+    ["The Neggery", "新奇蛋店", "https://www.neopets.com/winter/neggery.phtml", "用 Neggs 換東西"],
+    ["Ever Stocked General Store", "常備雜貨店", "https://www.neopets.com/generalstore.phtml", "一般雜貨"],
+  ]},
 ];
-// Restockable items worth 5k–500k, priciest first; the ultra-rares above that almost never appear.
-const VALUE_LIST = (cat) => `https://items.jellyneo.net/search/?cat[]=${cat}&scat[]=308&scat_active=1&min_price=5000&max_price=500000&sort=5&sort_dir=desc&limit=75`;
-const ALL_SHOPS = [
-  ["對戰", [["Kauvara's Magic Shop", 2], ["Battle Magic", 9], ["Defence Magic", 10], ["Space Weaponry", 23], ["Space Armour", 24], ["Ice Crystal Shop", 36], ["Tyrannian Weaponry", 45], ["Sakhmet Battle Supplies", 54], ["Haunted Weaponry", 59], ["Kayla's Potion Shop", 73], ["The Scrollery", 78], ["Brightvale Armoury", 80], ["Brightvale Motery", 82], ["Royal Potionery", 83], ["Maractite Marvels", 87], ["Desert Arms", 91], ["Faerie Weapon Shop", 93], ["Illustrious Armoury", 94], ["Magical Marvels", 96], ["Wonderous Weaponry", 100]]],
-  ["書", [["Magical Bookshop", 7], ["Faerieland Bookshop", 38], ["Sutek's Scrolls", 51], ["Booktastic Books", 70], ["Brightvale Books", 77], ["Words of Antiquity", 92], ["Neovian Printing Press", 106], ["Moltaran Books", 114]]],
-  ["收藏", [["Collectable Card Shop", 8], ["Neopian Post Office", 58], ["Collectable Coins", 68], ["Collectable Sea Shells", 86]]],
-  ["食物", [["Fresh Foods", 1], ["Chocolate Factory", 14], ["The Bakery", 15], ["Health Foods", 16], ["Smoothie Store", 18], ["Tropical Food", 20], ["Grundos Cafe", 22], ["Spooky Food", 30], ["The Coffee Cave", 34], ["Slushie Shop", 35], ["SHIFS Shop", 37], ["Faerie Foods", 39], ["Tyrannian Foods", 42], ["Hubert's Hot Dogs", 46], ["Pizzaroo", 47], ["Lost Desert Foods", 49], ["Merifoods", 56], ["Jelly Foods", 62], ["Refreshments", 63], ["Kiko Lake Treats", 66], ["Cafe Kreludor", 72], ["Brightvale Fruits", 81], ["Qasalan Delights", 90], ["Exquisite Ambrosia", 95], ["Exotic Foods", 101], ["The Crumpetmonger", 105], ["Molten Morsels", 112]]],
-  ["寵物的寵物", [["Neopian Petpet Shop", 25], ["Robo-Petpet Shop", 26], ["The Rock Pool", 27], ["Spooky Petpets", 31], ["Faerieland Petpets", 40], ["Tyrannian Petpets", 44], ["Peopatra's Petpets", 50], ["Ye Olde Petpets", 57], ["Wintery Petpets", 61], ["Maraquan Petpets", 88], ["Geraptiku Petpets", 89], ["Legendary Petpets", 97], ["Fanciful Fauna", 103], ["Moltaran Petpets", 113]]],
-  ["藥品", [["Neopian Pharmacy", 13], ["Lost Desert Medicine", 85], ["Remarkable Restoratives", 102]]],
-  ["玩具", [["Toy Shop", 3], ["Usukiland", 48], ["Darigan Toys", 74], ["Plushie Palace", 98], ["Springy Things", 116]]],
-  ["服裝", [["Unis Clothing Shop", 4], ["Prigpants & Swolthy, Tailors", 107], ["Mystical Surroundings", 108], ["Cog's Togs", 111], ["Ugga Shinies", 117]]],
-  ["家具、園藝", [["Neopian Garden Centre", 12], ["Neopian Furniture", 41], ["Tyrannian Furniture", 43], ["Osiri's Pottery", 55], ["Spooky Furniture", 60], ["Kiko Lake Carpentry", 67], ["Petpet Supplies", 69], ["Kreludan Homes", 71], ["Faerie Furniture", 75], ["Roo Island Souvenirs", 76], ["Brightvale Glaziers", 79], ["Chesterdrawers' Antiques", 104], ["Lampwyck's Lights Fantastic", 110]]],
-  ["其他", [["Grooming Parlour", 5], ["Neopian Gift Shop", 17], ["Tiki Tack", 21], ["Neopian School Supplies", 53], ["Neopian Music Shop", 84]]],
-];
-const SPECIAL_SHOPS = [
-  ["Igloo Garage Sale 圓頂屋大甩賣", "https://www.neopets.com/winter/igloo.phtml"],
-  ["Almost Abandoned Attic", "https://www.neopets.com/halloween/garage.phtml"],
-  ["Tarla's Shop of Mystery 塔拉的神秘之店", "https://www.neopets.com/winter/shopofmystery.phtml"],
-  ["Hidden Tower", "https://www.neopets.com/faerieland/hiddentower938.phtml"],
-  ["Smugglers Cove", "https://www.neopets.com/pirates/smugglerscove.phtml"],
-  ["Krawk Island Nippers", "https://www.neopets.com/pirates/piratepets.phtml"],
-  ["The Neggery", "https://www.neopets.com/winter/neggery.phtml"],
-  ["Ever Stocked General Store", "https://www.neopets.com/generalstore.phtml"],
-];
-const chip = (name, url) => `<a href="${url}" target="_blank" rel="noopener">${esc(name)}</a>`;
-document.getElementById("shops-top").innerHTML = TOP_SHOPS.map(([n, id, d, cat]) => `
-  <div class="shopcard">
-    <a class="shopname" href="${SHOP(id)}" target="_blank" rel="noopener">${esc(n)}</a>
-    <span>${esc(d)}</span>
-    <a class="value" href="${VALUE_LIST(cat)}" target="_blank" rel="noopener">值錢清單 →</a>
-  </div>`).join("");
-document.getElementById("shops-all").innerHTML =
-  ALL_SHOPS.map(([cat, list]) => `<h3>${esc(cat)}</h3><div class="links">${list.map(([n, id]) => chip(n, SHOP(id))).join("")}</div>`).join("") +
-  `<h3>特殊商店</h3><div class="links">${SPECIAL_SHOPS.map(([n, u]) => chip(n, u)).join("")}</div>`;
 
-const CLOTHES_SHOPS = [
-  ["Uni's Clothing Shop", 4, "尼奧市中心，衣服、帽子、配件，種類最多"],
-  ["Prigpants & Swolthy, Tailors", 107, "尼奧維亞，西裝、禮服、復古服飾"],
-  ["Mystical Surroundings", 108, "背景，所有寵物都能用"],
-  ["Cog's Togs", 111, "莫塔拉，齒輪、蒸汽龐克風服飾"],
-  ["Ugga Shinies", 117, "暴虐大地，前景和原始風飾品"],
-];
-const CLOTHES_EXTRA = [
-  ["Brightvale Fruits", 81, "偶爾有 Chia 專用翅膀"],
-  ["Tiki Tack", 21, "神秘島，偶爾有草鞋等穿戴品"],
-];
-const card = ([n, id, d]) => `<a href="${SHOP(id)}" target="_blank" rel="noopener">${esc(n)}<span>${esc(d)}</span></a>`;
-document.getElementById("clothes-shops").innerHTML = CLOTHES_SHOPS.map(card).join("");
-document.getElementById("clothes-extra").innerHTML = CLOTHES_EXTRA.map(card).join("");
+const shopUrl = (x) => (typeof x === "number" ? SHOP(x) : x);
+const shopCard = ([en, zh, id, d]) => `
+  <a class="shop" href="${shopUrl(id)}" target="_blank" rel="noopener">
+    <b>${esc(zh)}</b><span class="en">${esc(en)}</span><span class="desc">${esc(d)}</span>
+  </a>`;
+document.getElementById("shop-panels").innerHTML = SHOP_CATS.map((c) => `
+  <div class="panel" id="tab-${c.id}" role="tabpanel" aria-labelledby="t-${c.id}" hidden>
+    <div class="finder">
+      <div class="row">
+        <div class="field">
+          <label for="f-${c.id}">篩選這一頁的商店</label>
+          <input type="search" id="f-${c.id}" data-filter="${c.id}" placeholder="店名或販賣內容，中英文都可以">
+        </div>
+        <div class="field">
+          <label for="q-${c.id}">找商品在哪家店賣</label>
+          <input type="search" id="q-${c.id}" data-lookup="${c.id}" placeholder="輸入商品英文名，例如 Skull Book">
+          <a class="lookup" id="l-${c.id}" href="https://items.jellyneo.net/" target="_blank" rel="noopener" aria-disabled="true">輸入後點這裡，到 Jellyneo 查</a>
+        </div>
+      </div>
+    </div>
+    <section>
+      <h2>${esc(c.title)} <small>${esc(c.hint)}</small></h2>
+      <div class="shopgrid" data-grid="${c.id}">${c.shops.map(shopCard).join("")}</div>
+      <p class="empty" data-empty="${c.id}" hidden>沒有符合的商店</p>
+    </section>
+    ${c.extra ? `<section>
+      <h2>${esc(c.extraTitle)} <small>${esc(c.extraHint)}</small></h2>
+      <div class="shopgrid" data-grid="${c.id}">${c.extra.map(shopCard).join("")}</div>
+    </section>` : ""}
+  </div>`).join("");
+const clothesStatic = document.getElementById("clothes-static");
+clothesStatic.hidden = false;
+document.getElementById("tab-clothes").append(...clothesStatic.children);
+clothesStatic.remove();
+
+document.getElementById("shop-panels").addEventListener("input", (e) => {
+  const f = e.target.dataset.filter;
+  if (f) {
+    const q = e.target.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll(`[data-grid="${f}"] .shop`).forEach((a) => {
+      const hit = !q || a.textContent.toLowerCase().includes(q);
+      a.hidden = !hit;
+      if (hit) shown++;
+    });
+    document.querySelector(`[data-empty="${f}"]`).hidden = shown > 0;
+  }
+  const l = e.target.dataset.lookup;
+  if (l) {
+    const q = e.target.value.trim();
+    const a = document.getElementById(`l-${l}`);
+    a.href = q ? `https://items.jellyneo.net/search/?name=${encodeURIComponent(q)}` : "https://items.jellyneo.net/";
+    a.textContent = q ? `到 Jellyneo 查「${q}」在哪家店賣 →` : "輸入後點這裡，到 Jellyneo 查";
+    a.setAttribute("aria-disabled", String(!q));
+  }
+});
 
 const TAB_KEY = "neo-daily-tab";
-const TABS = ["daily", "sites", "clothes"];
+const TABS = ["daily", "sites", ...SHOP_CATS.map((c) => c.id)];
+const TAB_LABELS = { daily: "每日清單", sites: "相關網站", ...Object.fromEntries(SHOP_CATS.map((c) => [c.id, c.tab])) };
+document.getElementById("tabs").innerHTML = TABS.map((t, i) =>
+  `<button type="button" role="tab" id="t-${t}" aria-controls="tab-${t}" aria-selected="${i === 0}">${esc(TAB_LABELS[t])}</button>`).join("");
 function showTab(name) {
   for (const t of TABS) {
     document.getElementById(`tab-${t}`).hidden = t !== name;
@@ -554,5 +667,6 @@ try { const t = localStorage.getItem(TAB_KEY); if (TABS.includes(t)) showTab(t);
 
 render(); tick(); setInterval(tick, 30000);
 </script>
+
 </body>
 </html>
