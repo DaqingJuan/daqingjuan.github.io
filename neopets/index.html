@@ -166,7 +166,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
 <div class="wrap">
   <header>
     <h1>尼奧每日清單</h1>
-    <p class="sub">主帳號 tony22656176 · 勾選會在尼奧時間（NST）午夜自動清空</p>
+    <p class="sub">勾選會在尼奧時間（NST）午夜自動清空，只存在你自己的瀏覽器</p>
   </header>
 
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -175,7 +175,6 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
   <div class="hw-banner" id="hw-banner">
     <h2>萬聖節 Fright Track <small>到 10/31 23:59 NST</small></h2>
     <p>有橘色「萬聖節」標籤的項目可以累積活動積分，總共 2,500 分。最值錢的是 1,625 分的 Ghost Paint Brush（約 30～40 萬 NP），2,375 分有 Candy Vampire。</p>
-    <p>Esophagor 規則：先翻保險箱和背包 → 2 萬內直接買 → 太貴就按圖示換（每樣有 3 個選項輪流）→ 換過還在 2.5 萬內就買 → 全部超過 3 萬就放著讓它過期。</p>
     <div class="row">
       <button class="toggle" id="hw-only" type="button" aria-pressed="false">只看萬聖節積分項目</button>
       <a href="https://www.neopets.com/festivaloffears/?prizepass=1" target="_blank" rel="noopener">看目前積分 →</a>
@@ -211,17 +210,6 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
     </div>
   </section>
 
-  <section>
-    <h2>提醒</h2>
-    <ul class="memo">
-      <li>只有 tony 做每日。zxc、daqing 偶爾登入領 Food Club 獎金、銀行利息、賣股票就好，帳號之間不轉東西。</li>
-      <li>銀行一定先領利息，再提出 Food Club 和股票要用的錢。</li>
-      <li>轉盤、Apple Bobbing 有機會弄丟背包裡的東西，貴重物品先放保險箱。</li>
-      <li>「可能中」的大獎機率都很低，價格是 Jellyneo 標價，很多是開價。真的抽到時先看 itemdb 的成交紀錄再定價。</li>
-      <li>索禮任務的道具，買之前先翻保險箱和背包。</li>
-      <li>NeoPass 的手機遊戲任務跳過。</li>
-    </ul>
-  </section>
 
   <button class="reset" id="reset" type="button">清空今天的勾選</button>
   </div>
@@ -262,7 +250,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
         <span class="url">neofood.club</span>
         <ul>
           <li>自動算出當輪最划算的 10 注組合，打開就是目前這一輪。</li>
-          <li>Max bet 設成 13,332（tony 目前的每注上限）。</li>
+          <li>Max bet 設成自己的每注上限（50 + 2 × 帳號天數，下注頁上會寫）。</li>
           <li>下注頁：<a href="https://www.neopets.com/pirates/foodclub.phtml?type=bet" target="_blank" rel="noopener">Food Club 下注</a></li>
         </ul>
       </div>
@@ -322,14 +310,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
       </div>
     </section>
     <section>
-      <h2>買衣服小提醒</h2>
-      <ul class="memo">
-        <li>衣服要寵物「種族」合適才能穿。點商品時，名稱有寫種族的（例如 Chia Wings）只有那個種族能穿；背景、前景所有寵物都能用。</li>
-        <li>買之前先用 Shop Wizard 比價，玩家商店常常比 NPC 便宜。</li>
-        <li>NPC 商店結帳會進殺價頁，用店家開的價直接買最省事。</li>
-        <li>買到的衣服先放進「衣櫃 Closet」，換裝頁（Customise）才看得到。</li>
-        <li>這些店每隔幾分鐘補貨，賣光（Sold out）就晚點再來。</li>
-      </ul>
+      <h2>換裝工具</h2>
       <div class="tools">
         <a href="https://www.neopets.com/customise/" target="_blank" rel="noopener">換裝 Customise<span>幫寵物穿衣服</span></a>
         <a href="https://www.neopets.com/closet.phtml" target="_blank" rel="noopener">衣櫃 Closet<span>放已經有的衣服</span></a>
@@ -346,7 +327,7 @@ const SECTIONS = [
   { title: "錢先處理", hint: "照順序", items: [
     { id: "bank", name: "銀行領利息", url: N("/bank.phtml"), note: "先領利息，再提出今天要用的錢。Ultimate Riches 帳戶 12.5%。" },
     { id: "fc-collect", name: "Food Club 領獎金", url: N("/pirates/foodclub.phtml?tab=collect"), note: "昨天的注要手動領。" },
-    { id: "fc-bet", name: "Food Club 下注", url: N("/pirates/foodclub.phtml?tab=bet"), note: "10 注，每注上限約 13,332 NP。", tag: "10 注",
+    { id: "fc-bet", name: "Food Club 下注", url: N("/pirates/foodclub.phtml?tab=bet"), note: "10 注，每注上限是 50 + 2 × 帳號天數 NP。", tag: "10 注",
       links: [["NeoFoodClub 選注", "https://neofood.club/"]] },
     { id: "stock", name: "買股票 1,000 股", url: N("/stockmarket.phtml?type=list&full=true"), note: "挑 15 NP 最便宜的股票。", tag: "1,000 股",
       links: [["下單頁", N("/stockmarket.phtml?type=buy")]] },
@@ -408,7 +389,7 @@ const SECTIONS = [
     { id: "strength", name: "力大無窮 Test Your Strength", url: N("/halloween/strtest/index.phtml"), note: "", jackpot: "Hungry Fungus（約 2,000 萬）、Zomutt（約 1,750 萬）、Runny Snot（約 1,350 萬）", tag: "每 6 小時", hw: "+10 分 / 次，一天 4 次" },
     { id: "gravedanger", name: "前方凶險 Grave Danger", url: N("/halloween/gravedanger/"), note: "派寵物玩伴去探險，回來領東西。需要寵物玩伴。", jackpot: "寵物玩伴 Mootix（約 1,950 萬）、Glyme（約 1,625 萬）", tag: "1～7 小時", hw: "+5 分 / 次" },
     { id: "buried", name: "藏寶 Buried Treasure", url: N("/pirates/buriedtreasure/index.phtml"), note: "", tag: "300 NP · 每 3 小時" },
-    { id: "fishing", name: "釣釣漩渦 Fishing", url: N("/water/fishing.phtml"), note: "寵物釣魚技能會升級，等級越高越容易釣到好東西。兩隻寵物都要釣。", jackpot: "變身藥水 Transmogrification Potion（約 1,250 萬～2,000 萬）", tag: "隨機冷卻" },
+    { id: "fishing", name: "釣釣漩渦 Fishing", url: N("/water/fishing.phtml"), note: "寵物釣魚技能會升級，等級越高越容易釣到好東西。每隻寵物都可以各釣一次。", jackpot: "變身藥水 Transmogrification Potion（約 1,250 萬～2,000 萬）", tag: "隨機冷卻" },
     { id: "shrine", name: "科贊神龕 Coltzan's Shrine", url: N("/desert/shrine.phtml"), note: "有機會加能力值或給 NP。", jackpot: "Coltzans Diadem（約 1,450 萬）", tag: "每 13 小時" },
     { id: "snowager", name: "大雪怪 Snowager", url: N("/winter/snowager.phtml"), note: "牠睡著時可以偷寶物，被噴到寵物會掉血。", jackpot: "Sloth Negg（約 1,400 萬）", tag: "6、14、22 點 NST" },
     { id: "dice", name: "致命骰子 Deadly Dice", url: N("/worlds/deadlydice.phtml"), note: "只在 NST 凌晨 0–1 點開。", tag: "0–1 點 NST" },
@@ -434,7 +415,7 @@ const SECTIONS = [
     { id: "kpop", name: "奇扣戳氣球 Kiko Pop", url: N("/worlds/kiko/kpop/"), note: "選難度後丟飛鏢。", jackpot: "Holographic Usukicon Stamp（約 6,500 萬）、Flaming Meerca Stamp（約 6,000 萬）" },
     { id: "grumpy", name: "暴躁老國王 Grumpy Old King", url: N("/medieval/grumpyking.phtml"), note: "講笑話給國王聽，一天 2 次。", jackpot: "Skarl Royal Crown、King Skarl Quiguki Plushie（各約 2,000 萬）", tag: "一天 2 次" },
     { id: "wiseking", name: "智慧老國王 Wise Old King", url: N("/medieval/wiseking.phtml"), note: "選一句格言，一天 1 次。" },
-    { id: "battledome", name: "競技場 Battledome", url: N("/dome/fight.phtml"), note: "I_am_you_are_me 打 Mr. Chuckles（Hard），一天上限 50,000 NP、15 個道具。", tag: "約 50 場" },
+    { id: "battledome", name: "競技場 Battledome", url: N("/dome/fight.phtml"), note: "推薦打 Mr. Chuckles（Hard），一天上限 50,000 NP、15 個道具。", tag: "約 50 場" },
     { id: "hwhunt", name: "鬧鬼森林尋寶 Haunted Woods Hunt", url: N("/halloween/haunted_woods_hunt.phtml"), note: "免費次數用完要 NC 道具。", jackpot: "Hungry Fungus（約 2,000 萬）", hw: "+15 分 / 次，一天 2 次" },
   ]},
 ];
