@@ -324,6 +324,16 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
 const N = (p) => `https://www.neopets.com${p}`;
 // hw: Fright Track points this activity earns during the Festival of Fears.
 const SECTIONS = [
+  { title: "27 週年活動", hint: "11/10～11/20 NST，做活動拿慶典通行證點數", items: [
+    { id: "np27-pass", name: "慶典通行證 Celebration Pass", url: N("/np27birthday/?tab=pass"), note: "看目前點數、領獎。免費軌 1,890 點送 250 NC，3,000 點送生日變色筆 Birthday Paint Brush。", tag: "3,000 點", until: "2026-11-20",
+      links: [["活動總覽", N("/np27birthday/?tab=activities")], ["點數規則", "https://classic.support.neopets.com/hc/en-us/articles/50218173613325-How-do-I-earn-points"]] },
+    { id: "np27-wheel", name: "慶典之輪 Wheel of Celebration", url: N("/np27birthday/wheel.phtml"), note: "一天 2 次（第 2 次要看廣告），每轉 +25 點。轉完點輪盤領獎。", tag: "+25 點 / 次", until: "2026-11-20" },
+    { id: "np27-puzzle", name: "拼圖 A Piece of Neopia", url: N("/games/slidingpuzzle/"), note: "滑塊拼圖，一局至少拼完 1 張再送分才算。沒有每日上限，衝 3,000 點主要靠它。", tag: "+20 點 / 次", until: "2026-11-20" },
+    { id: "np27-train", name: "寵物訓練課", url: N("/pirates/academy.phtml?type=status"), note: "訓練每 1 小時 +5 點，一天最多 150 點。活動期間 Dubloon、Codestone 掉落加倍，課不要斷。", tag: "最多 150 點 / 天", until: "2026-11-20" },
+    { id: "np27-raid", name: "Monoceraptor Raid", url: N("/dome/"), note: "競技場打 Monoceraptor，每 100 傷害 +10 點，一天最多 300 點。牠很強，寵物會被打到 0 血，打完記得去康復泉補血。", tag: "最多 300 點 / 天", until: "2026-11-20" },
+    { id: "np27-greet", name: "寄生日賀卡 Neogreeting", url: N("/np27birthday/?tab=activities"), note: "寄一張生日賀卡給朋友 +10 點，一天最多 100 點。", tag: "最多 100 點 / 天", until: "2026-11-20" },
+    { id: "np27-map", name: "生日藏寶圖 Birthday Map", url: N("/games/treasure.phtml?type=birthday"), note: "集滿 9 片地圖碎片換獎品，+300 點（活動期間只算一次）。碎片要另外買，先查價格。", tag: "+300 點", until: "2026-11-20" },
+  ]},
   { title: "錢先處理", hint: "照順序", items: [
     { id: "bank", name: "銀行領利息", url: N("/bank.phtml"), note: "先領利息，再提出今天要用的錢。Ultimate Riches 帳戶 12.5%。" },
     { id: "fc-collect", name: "Food Club 領獎金", url: N("/pirates/foodclub.phtml?tab=collect"), note: "昨天的注要手動領。" },
