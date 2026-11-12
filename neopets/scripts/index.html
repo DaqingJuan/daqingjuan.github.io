@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>尼奧小工具腳本</title>
+<style>
+  :root { --bg: #fdf6e8; --card: #fffdf7; --ink: #3b2412; --muted: #7a6450; --line: #e7d3b1; --accent: #e8892b; --accent-ink: #fff; --tag: #f6e3c2; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1d1712; --card: #28201a; --ink: #f3e6d4; --muted: #b9a58f; --line: #4a3b2d; --accent: #f0a14f; --accent-ink: #231707; --tag: #3a2d20; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; padding: 32px max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left)); }
+  main { max-width: 680px; margin: 0 auto; display: grid; gap: 20px; }
+  h1 { font-size: 1.7rem; margin: 0; text-wrap: balance; }
+  .lead { color: var(--muted); margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; }
+  .card h2 { margin: 0; font-size: 1.2rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .ver { font-size: .78rem; font-weight: 700; background: var(--tag); border-radius: 6px; padding: 1px 8px; color: var(--muted); }
+  .card p, .card ul { margin: 0; }
+  .card ul { padding-left: 1.2em; color: var(--muted); }
+  .btn { justify-self: start; display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 16px; }
+  .btn:hover { filter: brightness(1.05); }
+  .steps { display: grid; gap: 6px; padding-left: 1.3em; margin: 0; }
+  code { background: var(--tag); border-radius: 5px; padding: 0 5px; font-size: .9em; }
+  .note { font-size: .88rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>尼奧小工具腳本</h1>
+  <p class="lead">兩個 Tampermonkey 腳本。先在 Chrome 裝好 Tampermonkey 擴充功能，再按下面的「安裝」，Tampermonkey 會跳出安裝畫面，按「安裝」就好。之後有新版會自動更新。</p>
+
+  <section class="card">
+    <h2>NPC 商店行情標籤 <span class="ver">v1.5</span></h2>
+    <p>在物品圖片左上角顯示 itemdb 市價：</p>
+    <ul>
+      <li>NPC 商店、隱密塔、幾乎廢棄的閣樓、圓頂屋車庫拍賣</li>
+      <li>交易站、二手店、Money Tree</li>
+      <li>背包裡 Karla 價格腳本顯示「?」的物品（例如放在交易站的）</li>
+    </ul>
+    <a class="btn" href="npc-price-tag.user.js">安裝 NPC 商店行情標籤</a>
+    <p class="note">第一次用前，先在同一個 Chrome 打開 <a href="https://itemdb.com.br" target="_blank" rel="noopener">itemdb.com.br</a> 通過驗證；Neopets 網站語言要設成 English。資料來源：itemdb.com.br。</p>
+  </section>
+
+  <section class="card">
+    <h2>A Piece of Neopia 拼圖小幫手 <span class="ver">v2.2</span></h2>
+    <p>週年慶滑塊拼圖自動解：自動判斷 3×3、4×4、5×5，偷看完成圖後幫你推好。</p>
+    <ul>
+      <li>【解這一張】解目前這張</li>
+      <li>【連續破關】一局內一直解下去，時間到自己按 Send Score</li>
+      <li>【自動 3 局】每局拼一張就送分，連續 3 局（每天只有前 3 次送分算點數）</li>
+    </ul>
+    <a class="btn" href="puzzle-helper.user.js">安裝拼圖小幫手</a>
+    <p class="note">執行時分頁要保持在前景，滑鼠不要移到遊戲畫面上。</p>
+  </section>
+
+  <section class="card">
+    <h2>安裝步驟</h2>
+    <ol class="steps">
+      <li>Chrome 線上應用程式商店搜尋 <code>Tampermonkey</code>，加到 Chrome。</li>
+      <li>新版 Chrome：到「擴充功能」→ Tampermonkey「詳細資料」→ 打開「允許使用者指令碼」。</li>
+      <li>回到這頁按「安裝」，在 Tampermonkey 的畫面按「安裝」。</li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>
