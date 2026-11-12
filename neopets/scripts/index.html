@@ -3,66 +3,171 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>尼奧小工具腳本</title>
+<title>尼奧腳本工具箱</title>
 <style>
-  :root { --bg: #fdf6e8; --card: #fffdf7; --ink: #3b2412; --muted: #7a6450; --line: #e7d3b1; --accent: #e8892b; --accent-ink: #fff; --tag: #f6e3c2; }
+  :root { --bg: #fdf6e8; --card: #fffdf7; --ink: #3b2412; --muted: #7a6450; --line: #e7d3b1; --accent: #e8892b; --accent-ink: #fff; --tag: #f6e3c2;
+          --safe: #2f8f4e; --safe-bg: #e2f4e7; --mid: #a86a00; --mid-bg: #fbecc9; --risk: #b3361f; --risk-bg: #fbe1db; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #1d1712; --card: #28201a; --ink: #f3e6d4; --muted: #b9a58f; --line: #4a3b2d; --accent: #f0a14f; --accent-ink: #231707; --tag: #3a2d20; }
+    :root { --bg: #1d1712; --card: #28201a; --ink: #f3e6d4; --muted: #b9a58f; --line: #4a3b2d; --accent: #f0a14f; --accent-ink: #231707; --tag: #3a2d20;
+            --safe: #7fd39a; --safe-bg: #1f3526; --mid: #f0c060; --mid-bg: #3b2f17; --risk: #ff9a85; --risk-bg: #43221b; }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; padding: 32px max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left)); }
-  main { max-width: 680px; margin: 0 auto; display: grid; gap: 20px; }
-  h1 { font-size: 1.7rem; margin: 0; text-wrap: balance; }
-  .lead { color: var(--muted); margin: 0; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: grid; gap: 10px; }
-  .card h2 { margin: 0; font-size: 1.2rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
-  .ver { font-size: .78rem; font-weight: 700; background: var(--tag); border-radius: 6px; padding: 1px 8px; color: var(--muted); }
-  .card p, .card ul { margin: 0; }
-  .card ul { padding-left: 1.2em; color: var(--muted); }
-  .btn { justify-self: start; display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 9px 16px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+         padding: 32px max(16px, env(safe-area-inset-right)) 56px max(16px, env(safe-area-inset-left)); }
+  main { max-width: 760px; margin: 0 auto; display: grid; gap: 22px; }
+  h1 { font-size: 1.8rem; margin: 0; text-wrap: balance; }
+  h2 { font-size: 1.25rem; margin: 10px 0 0; text-wrap: balance; }
+  .lead, .sub { color: var(--muted); margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .9rem; color: var(--muted); }
+  .grid { display: grid; gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 8px; min-width: 0; }
+  .card h3 { margin: 0; font-size: 1.08rem; display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+  .card p { margin: 0; }
+  .meta { font-size: .82rem; color: var(--muted); }
+  .badge { font-size: .74rem; font-weight: 700; border-radius: 6px; padding: 1px 8px; white-space: nowrap; }
+  .safe { color: var(--safe); background: var(--safe-bg); }
+  .mid { color: var(--mid); background: var(--mid-bg); }
+  .risk { color: var(--risk); background: var(--risk-bg); }
+  .ver { font-size: .74rem; font-weight: 700; background: var(--tag); border-radius: 6px; padding: 1px 8px; color: var(--muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn { display: inline-block; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 7px 14px; font-size: .92rem; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
   .btn:hover { filter: brightness(1.05); }
   .steps { display: grid; gap: 6px; padding-left: 1.3em; margin: 0; }
   code { background: var(--tag); border-radius: 5px; padding: 0 5px; font-size: .9em; }
+  a { color: inherit; }
   .note { font-size: .88rem; color: var(--muted); }
 </style>
 </head>
 <body>
 <main>
-  <h1>尼奧小工具腳本</h1>
-  <p class="lead">兩個 Tampermonkey 腳本。先在 Chrome 裝好 Tampermonkey 擴充功能，再按下面的「安裝」，Tampermonkey 會跳出安裝畫面，按「安裝」就好。之後有新版會自動更新。</p>
+  <header style="display:grid;gap:8px">
+    <h1>尼奧腳本工具箱</h1>
+    <p class="lead">玩 Neopets 好用的 Tampermonkey 腳本整理。按「安裝」後，Tampermonkey 會跳出安裝畫面，再按一次「安裝」就好；之後有新版會自動更新。</p>
+    <div class="legend">
+      <span><span class="badge safe">只顯示資訊</span> 只是幫你看，不會替你操作</span>
+      <span><span class="badge mid">自動填答 / 半自動</span> 幫你填好或少點幾下，最後還是你按</span>
+      <span><span class="badge risk">自動操作</span> 會自己一直點，Neopets 規定不能用機器人，可能被凍結帳號，自己評估</span>
+    </div>
+  </header>
 
   <section class="card">
-    <h2>NPC 商店行情標籤 <span class="ver">v1.6</span></h2>
-    <p>在物品圖片左上角顯示 itemdb 市價：</p>
-    <ul>
-      <li>NPC 商店、隱密塔、幾乎廢棄的閣樓、圓頂屋車庫拍賣</li>
-      <li>交易站、拍賣場（含拍賣精靈搜尋）、二手店、Money Tree</li>
-      <li>背包裡 Karla 價格腳本顯示「?」的物品（例如放在交易站的）</li>
-    </ul>
-    <a class="btn" href="npc-price-tag.user.js">安裝 NPC 商店行情標籤</a>
-    <p class="note">第一次用前，先在同一個 Chrome 打開 <a href="https://itemdb.com.br" target="_blank" rel="noopener">itemdb.com.br</a> 通過驗證；Neopets 網站語言要設成 English。資料來源：itemdb.com.br。</p>
-  </section>
-
-  <section class="card">
-    <h2>A Piece of Neopia 拼圖小幫手 <span class="ver">v2.2</span></h2>
-    <p>週年慶滑塊拼圖自動解：自動判斷 3×3、4×4、5×5，偷看完成圖後幫你推好。</p>
-    <ul>
-      <li>【解這一張】解目前這張</li>
-      <li>【連續破關】一局內一直解下去，時間到自己按 Send Score</li>
-      <li>【自動 3 局】每局拼一張就送分，連續 3 局（每天只有前 3 次送分算點數）</li>
-    </ul>
-    <a class="btn" href="puzzle-helper.user.js">安裝拼圖小幫手</a>
-    <p class="note">執行時分頁要保持在前景，滑鼠不要移到遊戲畫面上。</p>
-  </section>
-
-  <section class="card">
-    <h2>安裝步驟</h2>
+    <h3>第一次使用：安裝步驟</h3>
     <ol class="steps">
       <li>Chrome 線上應用程式商店搜尋 <code>Tampermonkey</code>，加到 Chrome。</li>
       <li>新版 Chrome：到「擴充功能」→ Tampermonkey「詳細資料」→ 打開「允許使用者指令碼」。</li>
-      <li>回到這頁按「安裝」，在 Tampermonkey 的畫面按「安裝」。</li>
+      <li>回到這頁，按想要的腳本的「安裝」。</li>
+      <li>Neopets 網站語言建議設成 English（網頁最下面的語言選單），很多腳本靠英文物品名稱運作。</li>
     </ol>
   </section>
+
+  <h2>自己做的腳本</h2>
+  <div class="grid">
+    <article class="card">
+      <h3>NPC 商店行情標籤 <span class="ver">v1.6</span><span class="badge safe">只顯示資訊</span></h3>
+      <p>在物品圖片左上角顯示 itemdb 市價，綠色＝很划算、黃色＝小賺、灰色＝不划算。支援：NPC 商店、隱密塔、幾乎廢棄的閣樓、拍賣場（含拍賣精靈）、交易站、圓頂屋車庫拍賣、二手店、Money Tree，還有背包裡交易中顯示「?」的物品。</p>
+      <p class="note">第一次用前，先在同一個 Chrome 打開 <a href="https://itemdb.com.br" target="_blank" rel="noopener">itemdb.com.br</a> 通過驗證。資料來源：itemdb.com.br。</p>
+      <div class="actions"><a class="btn" href="npc-price-tag.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>A Piece of Neopia 拼圖小幫手 <span class="ver">v2.2</span><span class="badge mid">半自動</span></h3>
+      <p>週年慶滑塊拼圖自動解。自動判斷 3×3、4×4、5×5，偷看完成圖後幫你推好。有「解這一張」「連續破關」「自動 3 局送分」三個按鈕。</p>
+      <p class="note">執行時分頁保持在前景，滑鼠不要移到遊戲上。每天只有前 3 次送分算慶典點數。</p>
+      <div class="actions"><a class="btn" href="puzzle-helper.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>黑帕奇拉霸自動玩 <span class="ver">v0.1</span><span class="badge risk">自動操作</span></h3>
+      <p>Black Pawkeet Slots 拉霸機：自動按「PLAY GAME → MAX BET → PLAY」一直轉，右上角有開始／停止按鈕。需要電腦有裝 Ruffle（Flash 播放器）。</p>
+      <p class="note">⚠️ 會自己一直玩，屬於機器人行為，有被凍結帳號的風險。</p>
+      <div class="actions"><a class="btn" href="pawkeet-slots-autoplay.user.js">安裝</a></div>
+    </article>
+  </div>
+
+  <h2>推薦的別人做的腳本</h2>
+  <p class="sub">以下連到作者的官方下載網址（不是複製檔），作者更新時會自動跟著更新。</p>
+  <div class="grid">
+    <article class="card">
+      <h3>NeoFoodClub 一鍵下注<span class="badge mid">半自動</span></h3>
+      <p>搭配 <a href="https://neofood.club" target="_blank" rel="noopener">neofood.club</a> 用：在那邊算好最佳下注組合，貼網址到 Neopets 競吃俱樂部頁面就能一注一鍵下好。</p>
+      <p class="meta">作者 diceroll123</p>
+      <div class="actions"><a class="btn" href="https://neofood.club/scripts/neofoodclub.user.js">安裝</a><a class="btn ghost" href="https://neofood.club/" target="_blank" rel="noopener">官網</a></div>
+    </article>
+    <article class="card">
+      <h3>Search Helper 搜尋小圖示<span class="badge safe">只顯示資訊</span></h3>
+      <p>在物品旁邊加上商店精靈、交易站、拍賣場、保險箱、itemdb 等快速搜尋小圖示，查價格超方便。</p>
+      <p class="meta">作者 diceroll123</p>
+      <div class="actions"><a class="btn" href="https://raw.githubusercontent.com/rneopets/NeoSearchHelper/main/searchhelper.user.js">安裝</a><a class="btn ghost" href="https://github.com/rneopets/NeoSearchHelper" target="_blank" rel="noopener">GitHub</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's item price display V2<span class="badge safe">只顯示資訊</span></h3>
+      <p>在保險箱、背包、快速存放、拍賣場、交易站等頁面的物品上顯示 itemdb 價格。跟上面的「NPC 商店行情標籤」互補。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/show_item_price_v2.user.js">安裝</a><a class="btn ghost" href="https://neopointskarla.com" target="_blank" rel="noopener">作者網站</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Quest Log Simplify<span class="badge safe">只顯示資訊</span></h3>
+      <p>把每日任務、連續獎勵、NeoPass 每日／每週任務整理在同一頁，每個任務都有快速連結。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/quest_log_simplifier.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Inventory Everywhere<span class="badge safe">只顯示資訊</span></h3>
+      <p>在任何頁面都能打開背包，不用一直來回切換頁面。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/inventory_everywhere.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Trophy Tracker<span class="badge safe">只顯示資訊</span></h3>
+      <p>在獎盃頁顯示你還缺哪些獎盃、哪些可以升級。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/trophy_tracker.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Shop Wizard Quick Buy<span class="badge mid">半自動</span></h3>
+      <p>商店精靈搜尋結果直接按「Buy」就能買，不用點進對方商店。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/sw_quick_buy.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Lunar Temple Answer<span class="badge mid">自動填答</span></h3>
+      <p>月神殿每日題目：自動標出正確的月相答案，你再自己按。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/lunar_temple_highlighter.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Grumpy / Wise Old King Autofill<span class="badge mid">自動填答</span></h3>
+      <p>脾氣暴躁的老國王、睿智的老國王：自動把笑話／智慧的下拉選單填好。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/old_king_autofill.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Mysterious Negg Cave Autosolver<span class="badge mid">自動填答</span></h3>
+      <p>神秘蛋穴每日謎題：自動算出答案並幫你擺好。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/mysterious_negg_cave_solver.user.js">安裝</a></div>
+    </article>
+    <article class="card">
+      <h3>Kiko Pop Fix<span class="badge safe">修正遊戲</span></h3>
+      <p>讓沒有 Flash 也能玩 Kiko Pop 小遊戲。</p>
+      <p class="meta">作者 Lamp・GPLv3</p>
+      <div class="actions"><a class="btn" href="https://update.greasyfork.org/scripts/486801/Kiko%20Pop%20Fix.user.js">安裝</a><a class="btn ghost" href="https://greasyfork.org/scripts/486801" target="_blank" rel="noopener">Greasy Fork</a></div>
+    </article>
+    <article class="card">
+      <h3>Lottery Numbers Generator<span class="badge mid">自動填答</span></h3>
+      <p>樂透頁自動填好號碼，而且盡量讓每張票的號碼不重複，提高中獎機會；最後的「買」還是你按。</p>
+      <p class="meta">作者 saahphire・Unlicense</p>
+      <div class="actions"><a class="btn ghost" href="https://github.com/saahphire/NeopetsUserscripts" target="_blank" rel="noopener">到作者 GitHub 下載</a></div>
+    </article>
+    <article class="card">
+      <h3>Karla's Battledome Bot<span class="badge risk">自動操作</span></h3>
+      <p>競技場自動打架：設定好武器和技能後會自己一場一場打。</p>
+      <p class="meta">作者 Karla・GPL3</p>
+      <p class="note">⚠️ 機器人行為，有被凍結帳號的風險。</p>
+      <div class="actions"><a class="btn" href="https://github.com/karlaneo/neopets-scripts/raw/refs/heads/main/battledome_bot.user.js">安裝</a></div>
+    </article>
+  </div>
+
+  <p class="note">另外還有 diceroll123 的「Sidebar Dailies」（側邊欄每日清單），目前找不到官方下載頁，所以沒放連結。</p>
 </main>
 </body>
 </html>
