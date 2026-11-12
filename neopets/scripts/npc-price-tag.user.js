@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      1.5
-// @description  在 NPC 商店、隱密塔、閣樓、交易站、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
+// @version      1.6
+// @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
 // @match        https://www.neopets.com/halloween/garage.phtml*
@@ -12,6 +12,8 @@
 // @match        https://www.neopets.com/thriftshoppe/*
 // @match        https://www.neopets.com/donations.phtml*
 // @match        https://www.neopets.com/inventory.phtml*
+// @match        https://www.neopets.com/auctions.phtml*
+// @match        https://www.neopets.com/genie.phtml*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -77,6 +79,30 @@
           img: imgIdOf(el.dataset.image || el.style.backgroundImage),
           shopPrice: 0,
           priced: false,
+        };
+      }).filter(Boolean);
+    }
+
+    // 拍賣場（列表和拍賣精靈搜尋結果）：每列一張 img.ah2_thumb，用「Current Price / 目前價格」那欄當標價
+    const aucImgs = [...document.querySelectorAll("img.ah2_thumb")].filter((i) => /\/items\//.test(i.src));
+    if (aucImgs.length) {
+      return aucImgs.map((img) => {
+        const tr = img.closest("tr");
+        if (!tr) return null;
+        // 找「Current Price」在第幾欄（標題「Item」橫跨圖片＋名稱兩欄，要把 colspan 算進去）
+        const headRow = [...(tr.closest("table")?.rows || [])].find((r) => /Current Price/i.test(r.innerText));
+        let pi = 6;
+        if (headRow) {
+          let col = 0;
+          for (const h of headRow.cells) { if (/Current Price/i.test(h.innerText)) { pi = col; break; } col += h.colSpan || 1; }
+        }
+        const priceCell = tr.cells[pi] || [...tr.cells].reverse().find((c) => /\d\s*NP/.test(c.innerText));
+        return {
+          el: wrapImg(img),
+          name: (tr.querySelector("[data-item-name]")?.getAttribute("data-item-name") || tr.cells[2]?.querySelector("a")?.textContent || "").trim(),
+          img: imgIdOf(img.src),
+          shopPrice: num((priceCell?.innerText.match(/([\d,]+)\s*NP/) || [])[1]),
+          priced: true,
         };
       }).filter(Boolean);
     }
