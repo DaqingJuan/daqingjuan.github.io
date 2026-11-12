@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Neopets 獎盃攻略（Trophy Guide）
 // @namespace    neopets-trophy-guide
-// @version      1.0
+// @version      1.1
 // @description  在獎盃頁（Trophy Cabinet）直接列出每個獎盃：拿到沒、拿到哪一級、怎麼拿（中文條件），附「去玩／高分榜／攻略」連結
-// @match        https://www.neopets.com/prizes.phtml*
+// @match        *://*.neopets.com/prizes.phtml*
+// @match        *://neopets.com/prizes.phtml*
 // @grant        none
 // @license      GPL-3.0
 // @downloadURL  https://daqingjuan.github.io/neopets/scripts/trophy-guide.user.js
