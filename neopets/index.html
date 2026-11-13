@@ -214,6 +214,39 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
   <button class="reset" id="reset" type="button">清空今天的勾選</button>
   </div>
 
+  <div class="panel" id="tab-kad" role="tabpanel" aria-labelledby="t-kad" hidden>
+    <section>
+      <h2>卡多艾蒂貓舍 Kadoatery</h2>
+      <div class="site feature">
+        <a class="site-name" href="https://www.neopets.com/games/kadoatery/index.phtml" target="_blank" rel="noopener">打開卡多艾蒂貓舍</a>
+        <span class="url">neopets.com/games/kadoatery/index.phtml</span>
+        <ul>
+          <li>主人去度假的卡多艾蒂（Kadoatie）會寄放在這裡，每隻都想要一樣指定的物品。</li>
+          <li>背包裡有牠要的東西，點牠的籠子就能交給牠。第一個餵的人，名字會掛在頁面上。</li>
+          <li>大約每 28 分鐘換一批，常見的食物一下子就被別人餵掉。</li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <h2>去哪買食物</h2>
+      <div class="tools">
+        <a href="https://www.neopets.com/shops/wizard.phtml" target="_blank" rel="noopener">Shop Wizard<span>搜玩家商店最便宜的價錢</span></a>
+        <a href="https://www.neopets.com/objects.phtml?type=shop&amp;obj_type=1" target="_blank" rel="noopener">新鮮食品店<span>Neopian Fresh Foods</span></a>
+        <a href="https://www.neopets.com/objects.phtml?type=shop&amp;obj_type=15" target="_blank" rel="noopener">麵包店<span>The Bakery</span></a>
+        <a href="https://www.neopets.com/objects.phtml?type=shop&amp;obj_type=14" target="_blank" rel="noopener">巧克力工廠<span>Chocolate Factory</span></a>
+        <a href="https://www.neopets.com/inventory.phtml" target="_blank" rel="noopener">我的背包<span>看手上有沒有牠要的</span></a>
+      </div>
+    </section>
+    <section>
+      <h2>小提醒</h2>
+      <ul class="memo">
+        <li>先看每隻卡多艾蒂要什麼，再去 Shop Wizard 搜最便宜的價錢，貴的就跳過。</li>
+        <li>食物要放在背包裡才能餵，放在保險箱裡的不算。</li>
+        <li>點籠子前先重新整理一次，確定牠還沒被別人餵。</li>
+      </ul>
+    </section>
+  </div>
+
   <div class="panel" id="tab-sites" role="tabpanel" aria-labelledby="t-sites" hidden>
     <section>
       <h2>查物品價值</h2>
@@ -711,8 +744,8 @@ document.getElementById("shop-panels").addEventListener("input", (e) => {
 });
 
 const TAB_KEY = "neo-daily-tab";
-const TABS = ["daily", "sites", "restock", ...SHOP_CATS.map((c) => c.id)];
-const TAB_LABELS = { daily: "每日清單", sites: "相關網站", restock: "搶貨清單", ...Object.fromEntries(SHOP_CATS.map((c) => [c.id, c.tab])) };
+const TABS = ["daily", "kad", "sites", "restock", ...SHOP_CATS.map((c) => c.id)];
+const TAB_LABELS = { daily: "每日清單", kad: "卡多艾蒂", sites: "相關網站", restock: "搶貨清單", ...Object.fromEntries(SHOP_CATS.map((c) => [c.id, c.tab])) };
 document.getElementById("tabs").innerHTML = TABS.map((t, i) =>
   `<button type="button" role="tab" id="t-${t}" aria-controls="tab-${t}" aria-selected="${i === 0}">${esc(TAB_LABELS[t])}</button>`).join("");
 function showTab(name) {
