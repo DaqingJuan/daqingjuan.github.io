@@ -386,16 +386,22 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
   <h2 class="tb-h2">自己做的腳本</h2>
   <div class="tb-grid">
     <article class="tb-card">
-      <h3>NPC 商店行情標籤 <span class="ver">v1.6</span><span class="ver">更新 2026-11-12</span><span class="badge safe">只顯示資訊</span></h3>
-      <p>在物品圖片左上角顯示 itemdb 市價，綠色＝很划算、黃色＝小賺、灰色＝不划算。支援：NPC 商店、隱密塔、幾乎廢棄的閣樓、拍賣場（含拍賣精靈）、交易站、圓頂屋車庫拍賣、二手店、Money Tree，還有背包裡交易中顯示「?」的物品。</p>
+      <h3>NPC 商店行情標籤 <span class="ver">v1.7</span><span class="ver">更新 2026-11-15</span><span class="badge safe">只顯示資訊</span></h3>
+      <p>在物品圖片左上角顯示 itemdb 市價，綠色＝很划算、黃色＝小賺、灰色＝不划算。支援：NPC 商店、隱密塔、幾乎廢棄的閣樓、拍賣場（含拍賣精靈）、交易站、圓頂屋車庫拍賣、二手店、Money Tree，還有背包裡交易中顯示「?」的物品。v1.7 新增<b>索禮任務頁</b>（廚房、雪精靈、食人樹、Jhudora）：任務要的每樣材料都顯示 itemdb 市價（綠＝1 萬內、黃＝5 萬內、紅＝超過 5 萬），右下角還有材料市價合計，一眼看出值不值得解。</p>
       <p class="note">第一次用前，先在同一個 Chrome 打開 <a href="https://itemdb.com.br" target="_blank" rel="noopener">itemdb.com.br</a> 通過驗證。資料來源：itemdb.com.br。</p>
       <div class="actions"><a class="btn" href="scripts/npc-price-tag.user.js">安裝</a></div>
     </article>
     <article class="tb-card">
-      <h3>A Piece of Neopia 拼圖小幫手 <span class="ver">v2.2</span><span class="ver">更新 2026-11-12</span><span class="badge mid">半自動</span></h3>
-      <p>週年慶滑塊拼圖自動解。自動判斷 3×3、4×4、5×5，偷看完成圖後幫你推好。有「解這一張」「連續破關」「自動 3 局送分」三個按鈕。</p>
-      <p class="note">執行時分頁保持在前景，滑鼠不要移到遊戲上。每天只有前 3 次送分算慶典點數。</p>
-      <div class="actions"><a class="btn" href="scripts/puzzle-helper.user.js">安裝</a></div>
+      <h3>超神奇商店精靈 <span class="ver">v1.3</span><span class="ver">更新 2026-11-15</span><span class="badge mid">半自動</span></h3>
+      <p>近似 Super Shop Wizard：進商店精靈頁面預設只有右側一顆魔法帽圖示（圓外框，大小和左右位置跟寶藏箱一樣，在它正上方），需要時點開面板，再點收起；對同一個物品連續查幾輪（預設 8 輪、每輪間隔 2～3 秒），把看到的賣家合併、依價格排序，低於基準 80% 標「偏低」、低於 50% 標「很低」。基準可填你自己的參考價，沒填就用中位數。</p>
+      <p class="note">不會自動購買，點「開店」自己確認再買。等於幫你多按幾次 Resubmit，輪數太多或太頻繁可能被伺服器拒絕，建議 8 輪以內。</p>
+      <div class="actions"><a class="btn" href="scripts/super-shop-wizard.user.js">安裝</a></div>
+    </article>
+    <article class="tb-card">
+      <h3>每日謎題自動答 <span class="ver">v1.0</span><span class="ver">更新 2026-11-15</span><span class="badge mid">自動填答</span></h3>
+      <p>Community Central 的每日謎題（Daily Puzzle）：自動到 Jellyneo 讀今天的題目和答案，先核對題目一樣，再在下拉選單選好答案並送出。題目對不上或選項找不到時不會送，面板會告訴你原因。可勾「進頁面自動執行」。</p>
+      <p class="note">午夜剛換日時，Neopets 有時還顯示前一天的題目，腳本偵測到題目不同就會停。答案來源：<a href="https://www.jellyneo.net/?go=dailypuzzle" target="_blank" rel="noopener">Jellyneo</a>。</p>
+      <div class="actions"><a class="btn" href="scripts/daily-puzzle-autoanswer.user.js">安裝</a></div>
     </article>
     <article class="tb-card">
       <h3>獎盃攻略 <span class="ver">v1.2</span><span class="ver">更新 2026-11-13</span><span class="badge safe">只顯示資訊</span></h3>
@@ -410,22 +416,16 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
       <div class="actions"><a class="btn" href="scripts/crossword-autofill.user.js">安裝</a></div>
     </article>
     <article class="tb-card">
-      <h3>每日謎題自動答 <span class="ver">v1.0</span><span class="ver">更新 2026-11-15</span><span class="badge mid">自動填答</span></h3>
-      <p>Community Central 的每日謎題（Daily Puzzle）：自動到 Jellyneo 讀今天的題目和答案，先核對題目一樣，再在下拉選單選好答案並送出。題目對不上或選項找不到時不會送，面板會告訴你原因。可勾「進頁面自動執行」。</p>
-      <p class="note">午夜剛換日時，Neopets 有時還顯示前一天的題目，腳本偵測到題目不同就會停。答案來源：<a href="https://www.jellyneo.net/?go=dailypuzzle" target="_blank" rel="noopener">Jellyneo</a>。</p>
-      <div class="actions"><a class="btn" href="scripts/daily-puzzle-autoanswer.user.js">安裝</a></div>
-    </article>
-    <article class="tb-card">
-      <h3>超神奇商店精靈 <span class="ver">v1.3</span><span class="ver">更新 2026-11-15</span><span class="badge mid">半自動</span></h3>
-      <p>近似 Super Shop Wizard：進商店精靈頁面預設只有右側一顆魔法帽圖示（圓外框，大小和左右位置跟寶藏箱一樣，在它正上方），需要時點開面板，再點收起；對同一個物品連續查幾輪（預設 8 輪、每輪間隔 2～3 秒），把看到的賣家合併、依價格排序，低於基準 80% 標「偏低」、低於 50% 標「很低」。基準可填你自己的參考價，沒填就用中位數。</p>
-      <p class="note">不會自動購買，點「開店」自己確認再買。等於幫你多按幾次 Resubmit，輪數太多或太頻繁可能被伺服器拒絕，建議 8 輪以內。</p>
-      <div class="actions"><a class="btn" href="scripts/super-shop-wizard.user.js">安裝</a></div>
-    </article>
-    <article class="tb-card">
       <h3>金字塔自動玩 <span class="ver">v1.1</span><span class="ver">更新 2026-11-13</span><span class="badge risk">自動操作</span></h3>
       <p>Pyramids 紙牌遊戲自動玩：每一步挑能接最長的一串、翻開最多蓋牌，直到清空金字塔次數達標，用來拿 Pyramid Bonus 獎盃（銅牌清空 2 次、銀牌 5 次）。面板可設定目標次數、最多局數、最多跑幾分鐘；勾「拚金牌」會玩到連續 2 局都清空（金牌條件）才停，並記錄累計清空率。</p>
       <p class="note">每局 50 NP，通常贏回更多；每天贏滿 5,000 NP 後之後的局免費。清空靠運氣，銅牌大約要玩 1 小時。⚠️ 機器人行為，有被凍結帳號的風險。</p>
       <div class="actions"><a class="btn" href="scripts/pyramids-autoplay.user.js">安裝</a></div>
+    </article>
+    <article class="tb-card">
+      <h3>A Piece of Neopia 拼圖小幫手 <span class="ver">v2.2</span><span class="ver">更新 2026-11-12</span><span class="badge mid">半自動</span></h3>
+      <p>週年慶滑塊拼圖自動解。自動判斷 3×3、4×4、5×5，偷看完成圖後幫你推好。有「解這一張」「連續破關」「自動 3 局送分」三個按鈕。</p>
+      <p class="note">執行時分頁保持在前景，滑鼠不要移到遊戲上。每天只有前 3 次送分算慶典點數。</p>
+      <div class="actions"><a class="btn" href="scripts/puzzle-helper.user.js">安裝</a></div>
     </article>
     <article class="tb-card">
       <h3>黑帕奇拉霸自動玩 <span class="ver">v0.1</span><span class="ver">更新 2026-11-12</span><span class="badge risk">自動操作</span></h3>

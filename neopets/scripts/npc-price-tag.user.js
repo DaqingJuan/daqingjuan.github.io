@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      1.6
-// @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
+// @version      1.7
+// @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
 // @match        https://www.neopets.com/halloween/garage.phtml*
@@ -14,6 +14,10 @@
 // @match        https://www.neopets.com/inventory.phtml*
 // @match        https://www.neopets.com/auctions.phtml*
 // @match        https://www.neopets.com/genie.phtml*
+// @match        https://www.neopets.com/island/kitchen.phtml*
+// @match        https://www.neopets.com/winter/snowfaerie.phtml*
+// @match        https://www.neopets.com/halloween/esophagor.phtml*
+// @match        https://www.neopets.com/faerieland/darkfaerie.phtml*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -65,8 +69,59 @@
     return w;
   }
 
+
+  // ---------- 任務頁（廚房、雪精靈、食人樹、Jhudora）：物品要什麼就顯示那個物品的市價 ----------
+  const QUEST_PATH = /\/(island\/kitchen|winter\/snowfaerie|halloween\/esophagor|faerieland\/darkfaerie)\.phtml/;
+  // quest item name: prefer <p>, drop icons/symbols (e.g. the swap arrow on Esophagor items) that are not plain English
+  const questName = (d) => {
+    const c = d.cloneNode(true);
+    c.querySelectorAll(".npt-tag, .npt-note").forEach((x) => x.remove()); // our own price tags must not become part of the name
+    return (c.querySelector("p")?.textContent || c.textContent).replace(/[^\x20-\x7E]+/g, " ").replace(/\s+/g, " ").trim();
+  };
+  function collectQuest() {
+    if (!QUEST_PATH.test(location.pathname)) return null;
+    const out = [];
+    // 廚房、雪精靈：.ingredient-grid 裡每格 = 圖片 + 名稱文字
+    document.querySelectorAll(".ingredient-grid > div").forEach((d) => {
+      const img = d.querySelector("img");
+      if (!img) return;
+      out.push({ el: wrapImg(img), name: questName(d), img: imgIdOf(img.src), shopPrice: 0, priced: false, quest: true });
+    });
+    // Jhudora：名稱在「Where is my XXX?」這句話裡，圖片是旁邊那一張物品圖
+    if (/darkfaerie/.test(location.pathname)) {
+      const m = document.body.innerText.match(/Where is my (.+?)\?/);
+      const img = m && [...document.querySelectorAll("img")].find((i) =>
+        /images\.neopets\.com\/items\//.test(i.src) && !i.closest(".sh-dock, .sh-tile, .npt-note, .search-helper") && i.getBoundingClientRect().width >= 30);
+      if (img) out.push({ el: wrapImg(img), name: m[1].trim(), img: imgIdOf(img.src), shopPrice: 0, priced: false, quest: true });
+    }
+    return out;
+  }
+
+  // 任務頁右下角摘要：材料市價合計（綠＝1 萬內、黃＝5 萬內、紅＝超過 5 萬）
+  function questSummary(cells, cache) {
+    if (!cells.length || !cells[0].quest) return;
+    const seenK = new Set();
+    let total = 0, unknown = 0;
+    const lines = [];
+    for (const c of cells) {
+      if (seenK.has(c.key)) continue;
+      seenK.add(c.key);
+      const hit = cache[c.key];
+      if (!hit) continue;
+      if (hit.v == null) { unknown++; lines.push(`${c.name}：無行情`); }
+      else { total += hit.v; lines.push(`${c.name}：${hit.v.toLocaleString("en-US")}`); }
+    }
+    if (!lines.length) return;
+    const color = total <= 10000 ? "#1f9d55" : total <= 50000 ? "#c98a12" : "#c0392b";
+    note(`<div style="font-weight:700">任務材料市價合計 <span style="color:${color}">${total.toLocaleString("en-US")} NP</span>${unknown ? `（另有 ${unknown} 樣無行情）` : ""}</div>` +
+      `<div style="font-size:12px;color:#555;margin-top:3px">${lines.join("<br>")}</div>` +
+      `<div style="font-size:11px;color:#888;margin-top:3px">市價是 itemdb 的參考價，實際買價以商店精靈為準</div>`);
+  }
+
   // 各種商店頁面：找出每件商品的「標籤要貼的位置、名稱、圖片編號、店價」
   function collect() {
+    const quest = collectQuest();
+    if (quest) return quest;
     // 背包：只補 Karla 價格腳本查不到（顯示「?」，例如放在交易站的物品）或沒有標價的格子
     if (/\/inventory\.phtml/.test(location.pathname)) {
       return [...document.querySelectorAll(".grid-item .item-img")].map((el) => {
@@ -266,6 +321,8 @@
       box-shadow: 0 1px 3px rgba(0,0,0,.35); white-space: nowrap; letter-spacing: .2px; }
     .npt-tag.good { background: #1f9d55; }
     .npt-tag.ok   { background: #c98a12; }
+    .npt-tag.bad  { background: #c0392b; }
+    .npt-tag.quest { font-size: 11px; line-height: 1.15; padding: 1px 4px; top: -3px; left: -3px; border-radius: 5px; }
     .npt-tag.none { background: rgba(120,120,120,.75); font-weight: 400; }
     .npt-note { position: fixed; right: 12px; bottom: 12px; z-index: 99999; max-width: 300px;
       font: 13px/1.45 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; color: #222;
@@ -296,6 +353,10 @@
         tag.classList.add("none");
         tag.textContent = "無行情";
         tag.title = `${c.name}\nitemdb 沒有市價資料`;
+      } else if (c.quest) {
+        tag.classList.add("quest", hit.v <= 10000 ? "good" : hit.v <= 50000 ? "ok" : "bad");
+        tag.textContent = hit.v.toLocaleString("en-US");
+        tag.title = `${c.name}\nQ: ${hit.v.toLocaleString("en-US")} NP` + (hit.r ? `\nr${hit.r}` : "") + "\nitemdb.com.br";
       } else if (c.priced === false || (c.priced === undefined && !c.shopPrice)) {
         // 沒有標價的頁面：直接看市價高低
         tag.classList.add(hit.v >= 100000 ? "good" : hit.v >= 10000 ? "ok" : "none");
@@ -335,6 +396,7 @@
     const now = Date.now();
     for (const k in cache) if (now - cache[k].t > CACHE_MS) delete cache[k];
     paint(cells, cache);
+    questSummary(cells, cache);
 
     const need = [];
     const seen = new Set();
@@ -362,6 +424,7 @@
         }
         saveCache(cache);
         paint(cells, cache);
+        questSummary(cells, cache);
       }
     }
   }
