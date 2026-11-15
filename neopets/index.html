@@ -97,6 +97,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
 .tools a { display: grid; gap: 1px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--ink); text-decoration: none; }
 .tools a:hover { border-color: var(--link); }
 .tools span { font-size: .8rem; color: var(--muted); }
+.tools a small { font-weight: 400; color: var(--muted); font-size: .75rem; }
 .site { display: grid; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
 .site.feature { border: 2px solid var(--accent); }
 .site a.site-name { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--ink); text-decoration: none; }
@@ -334,6 +335,25 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
   </div>
 
   <div id="shop-panels"></div>
+
+  <div class="panel" id="tab-scripts" role="tabpanel" aria-labelledby="t-scripts" hidden>
+    <section>
+      <h2>腳本工具箱 <small>Tampermonkey 腳本，點卡片就會跳出安裝畫面</small></h2>
+      <p class="sub">第一次用要先在 Chrome 裝 Tampermonkey，並到「擴充功能」→ Tampermonkey →「詳細資料」打開「允許使用者指令碼」。按安裝後再按一次「安裝」就好，之後有新版會自動更新。</p>
+      <div class="tools">
+      <a href="scripts/super-shop-wizard.user.js" target="_blank" rel="noopener"><b>超神奇商店精靈 <small>v1.1</small></b><span>商店精靈多查幾輪，合併賣家依價格排序，標出相對低價；右上角魔法帽圖示點開。</span><span>半自動 · 更新 2026-11-15</span></a>
+      <a href="scripts/daily-puzzle-autoanswer.user.js" target="_blank" rel="noopener"><b>每日謎題自動答 <small>v1.0</small></b><span>每日謎題：讀 Jellyneo 答案、核對題目後選好送出。</span><span>自動填答 · 更新 2026-11-15</span></a>
+      <a href="scripts/pyramids-autoplay.user.js" target="_blank" rel="noopener"><b>金字塔自動玩 <small>v1.1</small></b><span>Pyramids 自動玩拿獎盃，有凍結帳號風險。</span><span>自動操作 · 更新 2026-11-13</span></a>
+      <a href="scripts/trophy-guide.user.js" target="_blank" rel="noopener"><b>獎盃攻略 <small>v1.2</small></b><span>獎盃頁列出拿到沒、取得條件和攻略連結。</span><span>只顯示資訊 · 更新 2026-11-13</span></a>
+      <a href="scripts/crossword-autofill.user.js" target="_blank" rel="noopener"><b>填字自動填 <small>v1.0</small></b><span>妖精填字一鍵填完（抓 Jellyneo 答案、核對字數）。</span><span>自動填答 · 更新 2026-11-13</span></a>
+      <a href="scripts/npc-price-tag.user.js" target="_blank" rel="noopener"><b>NPC 商店行情標籤 <small>v1.6</small></b><span>商店、拍賣場等頁面在物品上顯示 itemdb 市價。</span><span>只顯示資訊 · 更新 2026-11-12</span></a>
+      <a href="scripts/puzzle-helper.user.js" target="_blank" rel="noopener"><b>拼圖小幫手 <small>v2.2</small></b><span>週年慶滑塊拼圖自動解，含自動 3 局送分。</span><span>半自動 · 更新 2026-11-12</span></a>
+      <a href="scripts/pawkeet-slots-autoplay.user.js" target="_blank" rel="noopener"><b>黑帕奇拉霸自動玩 <small>v0.1</small></b><span>Black Pawkeet Slots 自動轉，有凍結帳號風險。</span><span>自動操作 · 更新 2026-11-12</span></a>
+      </div>
+      <p class="sub"><a href="scripts/" target="_blank" rel="noopener">完整說明、別人做的推薦腳本（NeoFoodClub、Search Helper、Karla 系列…）→</a></p>
+    </section>
+  </div>
+
 
   <div id="clothes-static" hidden>
     <section>
@@ -744,8 +764,8 @@ document.getElementById("shop-panels").addEventListener("input", (e) => {
 });
 
 const TAB_KEY = "neo-daily-tab";
-const TABS = ["daily", "kad", "sites", "restock", ...SHOP_CATS.map((c) => c.id)];
-const TAB_LABELS = { daily: "每日清單", kad: "卡多艾蒂", sites: "相關網站", restock: "搶貨清單", ...Object.fromEntries(SHOP_CATS.map((c) => [c.id, c.tab])) };
+const TABS = ["daily", "kad", "sites", "restock", ...SHOP_CATS.map((c) => c.id), "scripts"];
+const TAB_LABELS = { daily: "每日清單", kad: "卡多艾蒂", sites: "相關網站", restock: "搶貨清單", ...Object.fromEntries(SHOP_CATS.map((c) => [c.id, c.tab])), scripts: "腳本工具箱" };
 document.getElementById("tabs").innerHTML = TABS.map((t, i) =>
   `<button type="button" role="tab" id="t-${t}" aria-controls="tab-${t}" aria-selected="${i === 0}">${esc(TAB_LABELS[t])}</button>`).join("");
 function showTab(name) {
