@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         超神奇商店精靈
 // @namespace    tony-neopets
-// @version      1.1
-// @description  在 Shop Wizard 頁面右上角加一個魔法帽圖示，點開後展開面板：對同一個物品連續查幾輪（等於你自己按 Resubmit 好幾次），把每輪看到的賣家合併、依價格排序，標出相對便宜的。購買仍由你手動點連結，腳本不會自動買。
+// @version      1.3
+// @description  在 Shop Wizard 頁面右側加一個魔法帽圖示（大小、左右位置跟寶藏箱一致），點開後展開面板：對同一個物品連續查幾輪（等於你自己按 Resubmit 好幾次），把每輪看到的賣家合併、依價格排序，標出相對便宜的。購買仍由你手動點連結，腳本不會自動買。
 // @match        https://www.neopets.com/shops/wizard.phtml*
 // @grant        none
 // @run-at       document-idle
@@ -30,10 +30,10 @@
   // ---------- 面板 ----------
   const box = document.createElement('div');
   box.style.cssText =
-    'position:fixed;right:10px;top:124px;z-index:99999;width:380px;max-height:78vh;overflow:auto;display:none;' +
+    'position:fixed;right:50px;top:calc(30vh + 45px);z-index:99999;width:380px;max-width:calc(100vw - 100px);max-height:calc(70vh - 130px);overflow:auto;display:none;' +
     'background:#fff;border:2px solid #3b6fb6;border-radius:10px;padding:10px;font:13px/1.45 sans-serif;color:#222;box-shadow:0 3px 12px #0005';
   box.innerHTML =
-    '<div style="font-weight:bold;font-size:14px;display:flex;justify-content:space-between;align-items:center">超神奇商店精靈 1.1' +
+    '<div style="font-weight:bold;font-size:14px;display:flex;justify-content:space-between;align-items:center">超神奇商店精靈 1.3' +
     '<button id="ssw-close" title="收起" style="cursor:pointer;border:1px solid #bbb;border-radius:50%;width:24px;height:24px;background:#fff;line-height:1">×</button></div>' +
     '<div style="margin:6px 0">物品名稱：<input id="ssw-name" style="width:230px"></div>' +
     '<div style="margin:6px 0">比對：<select id="ssw-crit"><option value="exact">完全相同</option><option value="containing">包含</option></select> ' +
@@ -51,10 +51,10 @@
   fab.id = 'ssw-fab';
   fab.title = '超神奇商店精靈（點一下展開）';
   fab.style.cssText =
-    'position:fixed;right:10px;top:70px;z-index:100000;width:46px;height:46px;border-radius:50%;' +
+    'position:fixed;right:50px;top:calc(30vh - 35px);z-index:100000;width:70px;height:70px;box-sizing:border-box;border-radius:50%;transition:transform .15s;' +
     'border:3px solid #3b6fb6;background:#fff;padding:0;cursor:pointer;box-shadow:0 2px 8px #0005;display:flex;align-items:center;justify-content:center';
   fab.innerHTML =
-    '<svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">' +
+    '<svg viewBox="0 0 64 64" width="52" height="52" aria-hidden="true">' +
     '<ellipse cx="32" cy="50" rx="26" ry="7" fill="#3b2a8f"/>' +
     '<path d="M16 50 C20 36 24 24 34 6 C37 18 44 34 48 50 Z" fill="#5b43c9"/>' +
     '<path d="M18 46 C28 52 40 52 47 46 L48 50 C40 55 26 55 17 50 Z" fill="#f2c230"/>' +
@@ -65,11 +65,12 @@
   function setOpen(open) {
     box.style.display = open ? 'block' : 'none';
     fab.style.background = open ? '#e6efff' : '#fff';
-    try { localStorage.setItem('ssw_open', open ? '1' : '0'); } catch (e) {}
   }
+  fab.addEventListener('mouseenter', () => { fab.style.transform = 'scale(1.12) rotate(-8deg)'; });
+  fab.addEventListener('mouseleave', () => { fab.style.transform = ''; });
   fab.addEventListener('click', () => setOpen(box.style.display === 'none'));
   $('ssw-close').addEventListener('click', () => setOpen(false));
-  try { setOpen(localStorage.getItem('ssw_open') === '1'); } catch (e) { setOpen(false); }
+  setOpen(false); // 每次進頁面都先只顯示魔法帽圖示
 
   // 預設帶入頁面搜尋框已輸入的文字
   const pageInput = document.querySelector('#shopwizard, input[name=shopwizard]');
