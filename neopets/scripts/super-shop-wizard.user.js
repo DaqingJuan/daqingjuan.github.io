@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         超神奇商店精靈
 // @namespace    tony-neopets
-// @version      1.0
-// @description  在 Shop Wizard 頁面加一個面板：對同一個物品連續查幾輪（等於你自己按 Resubmit 好幾次），把每輪看到的賣家合併、依價格排序，標出相對便宜的。購買仍由你手動點連結，腳本不會自動買。
+// @version      1.1
+// @description  在 Shop Wizard 頁面右上角加一個魔法帽圖示，點開後展開面板：對同一個物品連續查幾輪（等於你自己按 Resubmit 好幾次），把每輪看到的賣家合併、依價格排序，標出相對便宜的。購買仍由你手動點連結，腳本不會自動買。
 // @match        https://www.neopets.com/shops/wizard.phtml*
 // @grant        none
 // @run-at       document-idle
@@ -30,10 +30,11 @@
   // ---------- 面板 ----------
   const box = document.createElement('div');
   box.style.cssText =
-    'position:fixed;right:10px;top:70px;z-index:99999;width:380px;max-height:80vh;overflow:auto;' +
+    'position:fixed;right:10px;top:124px;z-index:99999;width:380px;max-height:78vh;overflow:auto;display:none;' +
     'background:#fff;border:2px solid #3b6fb6;border-radius:10px;padding:10px;font:13px/1.45 sans-serif;color:#222;box-shadow:0 3px 12px #0005';
   box.innerHTML =
-    '<div style="font-weight:bold;font-size:14px">超神奇商店精靈 1.0</div>' +
+    '<div style="font-weight:bold;font-size:14px;display:flex;justify-content:space-between;align-items:center">超神奇商店精靈 1.1' +
+    '<button id="ssw-close" title="收起" style="cursor:pointer;border:1px solid #bbb;border-radius:50%;width:24px;height:24px;background:#fff;line-height:1">×</button></div>' +
     '<div style="margin:6px 0">物品名稱：<input id="ssw-name" style="width:230px"></div>' +
     '<div style="margin:6px 0">比對：<select id="ssw-crit"><option value="exact">完全相同</option><option value="containing">包含</option></select> ' +
     '輪數：<input id="ssw-rounds" type="number" min="1" max="' + MAX_ROUNDS + '" value="8" style="width:44px"></div>' +
@@ -44,6 +45,31 @@
     '<div id="ssw-result"></div>';
   document.body.appendChild(box);
   const $ = (id) => document.getElementById(id);
+
+  // ---------- 魔法帽圖示（圓外框），點一下展開／收起 ----------
+  const fab = document.createElement('button');
+  fab.id = 'ssw-fab';
+  fab.title = '超神奇商店精靈（點一下展開）';
+  fab.style.cssText =
+    'position:fixed;right:10px;top:70px;z-index:100000;width:46px;height:46px;border-radius:50%;' +
+    'border:3px solid #3b6fb6;background:#fff;padding:0;cursor:pointer;box-shadow:0 2px 8px #0005;display:flex;align-items:center;justify-content:center';
+  fab.innerHTML =
+    '<svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">' +
+    '<ellipse cx="32" cy="50" rx="26" ry="7" fill="#3b2a8f"/>' +
+    '<path d="M16 50 C20 36 24 24 34 6 C37 18 44 34 48 50 Z" fill="#5b43c9"/>' +
+    '<path d="M18 46 C28 52 40 52 47 46 L48 50 C40 55 26 55 17 50 Z" fill="#f2c230"/>' +
+    '<path d="M34 6 C40 8 44 14 41 22 C39 14 37 10 34 6 Z" fill="#7a63e0"/>' +
+    '<polygon points="30,28 31.8,32 36,32.4 32.8,35 33.8,39 30,36.8 26.2,39 27.2,35 24,32.4 28.2,32" fill="#ffe27a"/>' +
+    '</svg>';
+  document.body.appendChild(fab);
+  function setOpen(open) {
+    box.style.display = open ? 'block' : 'none';
+    fab.style.background = open ? '#e6efff' : '#fff';
+    try { localStorage.setItem('ssw_open', open ? '1' : '0'); } catch (e) {}
+  }
+  fab.addEventListener('click', () => setOpen(box.style.display === 'none'));
+  $('ssw-close').addEventListener('click', () => setOpen(false));
+  try { setOpen(localStorage.getItem('ssw_open') === '1'); } catch (e) { setOpen(false); }
 
   // 預設帶入頁面搜尋框已輸入的文字
   const pageInput = document.querySelector('#shopwizard, input[name=shopwizard]');
