@@ -7,7 +7,7 @@ https://daqingjuan.github.io/neopets/scripts/
 
 | 腳本 | 用途 | 更新日期 | 安裝 |
 |---|---|---|---|
-| NPC 商店行情標籤 | NPC 商店、拍賣場、交易站等頁面，在物品圖片左上角顯示 itemdb 市價（v1.7 起也支援索禮任務頁，顯示材料市價合計） | 2026-11-15 | [npc-price-tag.user.js](https://daqingjuan.github.io/neopets/scripts/npc-price-tag.user.js) |
+| NPC 商店行情標籤 | NPC 商店、拍賣場、交易站等頁面，在物品圖片左上角顯示 itemdb 市價（v1.7 起也支援索禮任務頁，v1.8 加入女巫塔，顯示材料市價合計） | 2026-11-18 | [npc-price-tag.user.js](https://daqingjuan.github.io/neopets/scripts/npc-price-tag.user.js) |
 | 超神奇商店精靈 | 商店精靈多查幾輪，合併賣家依價格排序並標出相對低價（不自動購買） | 2026-11-15 | [super-shop-wizard.user.js](https://daqingjuan.github.io/neopets/scripts/super-shop-wizard.user.js) |
 | 每日謎題自動答 | Community Central 每日謎題：自動讀 Jellyneo 答案、核對題目後選好送出 | 2026-11-15 | [daily-puzzle-autoanswer.user.js](https://daqingjuan.github.io/neopets/scripts/daily-puzzle-autoanswer.user.js) |
 | 獎盃攻略 | 獎盃頁列出每個獎盃拿到沒、中文取得條件、去玩／高分榜／攻略連結 | 2026-11-13 | [trophy-guide.user.js](https://daqingjuan.github.io/neopets/scripts/trophy-guide.user.js) |
