@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      1.8
+// @version      1.9
 // @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
@@ -18,6 +18,7 @@
 // @match        https://www.neopets.com/winter/snowfaerie.phtml*
 // @match        https://www.neopets.com/halloween/esophagor.phtml*
 // @match        https://www.neopets.com/halloween/witchtower.phtml*
+// @match        https://www.neopets.com/space/coincidence.phtml*
 // @match        https://www.neopets.com/faerieland/darkfaerie.phtml*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
@@ -72,7 +73,7 @@
 
 
   // ---------- 任務頁（廚房、雪精靈、食人樹、Jhudora）：物品要什麼就顯示那個物品的市價 ----------
-  const QUEST_PATH = /\/(island\/kitchen|winter\/snowfaerie|halloween\/esophagor|halloween\/witchtower|faerieland\/darkfaerie)\.phtml/;
+  const QUEST_PATH = /\/(island\/kitchen|winter\/snowfaerie|halloween\/esophagor|halloween\/witchtower|space\/coincidence|faerieland\/darkfaerie)\.phtml/;
   // quest item name: prefer <p>, drop icons/symbols (e.g. the swap arrow on Esophagor items) that are not plain English
   const questName = (d) => {
     const c = d.cloneNode(true);

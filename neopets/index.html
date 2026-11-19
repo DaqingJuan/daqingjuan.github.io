@@ -386,7 +386,7 @@ h2 small { font-family: var(--font-body); font-weight: 400; font-size: .8rem; co
   <h2 class="tb-h2">自己做的腳本</h2>
   <div class="tb-grid">
     <article class="tb-card">
-      <h3>NPC 商店行情標籤 <span class="ver">v1.8</span><span class="ver">更新 2026-11-18</span><span class="badge safe">只顯示資訊</span></h3>
+      <h3>NPC 商店行情標籤 <span class="ver">v1.9</span><span class="ver">更新 2026-11-20</span><span class="badge safe">只顯示資訊</span></h3>
       <p>在物品圖片左上角顯示 itemdb 市價，綠色＝很划算、黃色＝小賺、灰色＝不划算。支援：NPC 商店、隱密塔、幾乎廢棄的閣樓、拍賣場（含拍賣精靈）、交易站、圓頂屋車庫拍賣、二手店、Money Tree，還有背包裡交易中顯示「?」的物品。v1.7 新增<b>索禮任務頁</b>（廚房、雪精靈、食人樹、Jhudora）：任務要的每樣材料都顯示 itemdb 市價（綠＝1 萬內、黃＝5 萬內、紅＝超過 5 萬），右下角還有材料市價合計，一眼看出值不值得解。</p>
       <p class="note">第一次用前，先在同一個 Chrome 打開 <a href="https://itemdb.com.br" target="_blank" rel="noopener">itemdb.com.br</a> 通過驗證。資料來源：itemdb.com.br。</p>
       <div class="actions"><a class="btn" href="scripts/npc-price-tag.user.js">安裝</a></div>
@@ -577,6 +577,7 @@ const SECTIONS = [
     { id: "witch", name: "女巫塔 Edna", url: N("/halloween/witchtower.phtml"), note: "找 3 樣材料，常常很貴，划不來就跳過。", hw: "+10 分 / 次，一天 10 次" },
     { id: "kitchen", name: "神秘島廚房 Kitchen Quest", url: N("/island/kitchen.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Kitchen Quest Cookbook（約 1,950 萬）、Earth Faerie Doll（約 2,000 萬）" },
     { id: "jhudora", name: "黑暗精靈 Jhudora", url: N("/faerieland/darkfaerie.phtml"), note: "接任務後約 16 分鐘內交指定道具。沒交或時間到會掉回第 1 級，所以先查好價格再接。和 Illusen 共用冷卻。", jackpot: "第 47 級 Jhudoras Coin（約 2 億）、第 50 級 Jhudoras Scimitar of Secrets（約 1.2 億）、第 44 級 Jhudoras Crystals（約 520 萬）", tag: "每 12 小時" },
+    { id: "coincidence", name: "太空船 Coincidence（Dr Landelbrot）", url: N("/space/coincidence.phtml"), note: "幫博士找指定道具（每樣 3 個）讓隨機事件機器恢復，道具太貴就跳過。" },
     { id: "snowfaerie", name: "雪精靈 Snow Faerie", url: N("/winter/snowfaerie.phtml"), note: "一天最多 10 次，道具太貴就不要解。", jackpot: "Taelia Coin（約 2 億）、冰淇淋機優惠券（約 2,300 萬～2,500 萬）" },
   ]},
   { title: "免費領取", hint: "點一下就拿，一天一次", items: [
