@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      1.9
+// @version      2.0
 // @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
@@ -326,6 +326,14 @@
     .npt-tag.bad  { background: #c0392b; }
     .npt-tag.quest { font-size: 11px; line-height: 1.15; padding: 1px 4px; top: -3px; left: -3px; border-radius: 5px; }
     .npt-tag.none { background: rgba(120,120,120,.75); font-weight: 400; }
+    .npt-sale { position: absolute; top: 2px; right: 2px; z-index: 5; pointer-events: auto;
+      font: 700 10px/1.2 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      padding: 1px 4px; border-radius: 6px; border: 1.5px solid; white-space: nowrap;
+      background: rgba(20,28,40,.88); box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+    .npt-sale.ets { color: #5fd08f; border-color: #3fb56f; }
+    .npt-sale.regular { color: #f2d04a; border-color: #d9b52f; }
+    .npt-sale.hts { color: #ff7b7b; border-color: #e65a5a; }
+    .npt-sale.quest { top: -3px; right: -3px; }
     .npt-note { position: fixed; right: 12px; bottom: 12px; z-index: 99999; max-width: 300px;
       font: 13px/1.45 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; color: #222;
       background: #fff8e6; border: 2px solid #e8a31b; border-radius: 10px; padding: 8px 10px;
@@ -348,6 +356,7 @@
     for (const c of cells) {
       const hit = cache[c.key];
       c.el.querySelector(".npt-tag")?.remove();
+      c.el.querySelector(".npt-sale")?.remove();
       if (!hit) continue;
       const tag = document.createElement("span");
       tag.className = "npt-tag";
@@ -373,6 +382,14 @@
       }
       c.el.classList.add("npt-host");
       c.el.appendChild(tag);
+      const SALE = { ets: ["\u597d\u8ce3", "Easy to Sell"], regular: ["\u666e\u901a", "Regular"], hts: ["\u96e3\u8ce3", "Hard to Sell"] };
+      if (hit.s && SALE[hit.s]) {
+        const sb = document.createElement("span");
+        sb.className = "npt-sale " + hit.s + (c.quest ? " quest" : "");
+        sb.textContent = SALE[hit.s][0];
+        sb.title = SALE[hit.s][1] + (hit.sp != null ? " (" + hit.sp + "% sold)" : "") + "\nitemdb.com.br";
+        c.el.appendChild(sb);
+      }
     }
   }
 
@@ -402,7 +419,7 @@
 
     const need = [];
     const seen = new Set();
-    for (const c of cells) if (!cache[c.key] && !seen.has(c.key)) { seen.add(c.key); need.push(c); }
+    for (const c of cells) if ((!cache[c.key] || cache[c.key].s === undefined) && !seen.has(c.key)) { seen.add(c.key); need.push(c); }
 
     if (need.length) {
       const r = await lookup(need.map((c) => ({ name: c.name, img: c.img })));
@@ -417,12 +434,12 @@
         const byKey = new Map();
         for (const it of items) {
           const img = it.image?.id || (String(it.image?.url || it.image || "").match(/\/items\/([^/]+?)\.(gif|png|jpg)/i) || [])[1] || "";
-          const val = { v: priceOf(it), r: it.rarity ?? null, t: now };
+          const val = { v: priceOf(it), r: it.rarity ?? null, s: it.saleStatus?.status ?? null, sp: it.saleStatus?.percent ?? null, t: now };
           byKey.set(it.name + "|" + img, val);
           if (!byKey.has(it.name + "|")) byKey.set(it.name + "|", val);
         }
         for (const c of need) {
-          cache[c.key] = byKey.get(c.key) || byKey.get(c.name + "|") || { v: null, r: null, t: now };
+          cache[c.key] = byKey.get(c.key) || byKey.get(c.name + "|") || { v: null, r: null, s: null, sp: null, t: now };
         }
         saveCache(cache);
         paint(cells, cache);
