@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      2.0
+// @version      2.1
 // @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
@@ -326,14 +326,14 @@
     .npt-tag.bad  { background: #c0392b; }
     .npt-tag.quest { font-size: 11px; line-height: 1.15; padding: 1px 4px; top: -3px; left: -3px; border-radius: 5px; }
     .npt-tag.none { background: rgba(120,120,120,.75); font-weight: 400; }
-    .npt-sale { position: absolute; top: 2px; right: 2px; z-index: 5; pointer-events: auto;
-      font: 700 10px/1.2 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
-      padding: 1px 4px; border-radius: 6px; border: 1.5px solid; white-space: nowrap;
+    .npt-sale { position: absolute; bottom: 2px; right: 2px; z-index: 5; pointer-events: auto;
+      font: 700 9px/1.1 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      padding: 0 3px; border-radius: 5px; border: 1px solid; white-space: nowrap;
       background: rgba(20,28,40,.88); box-shadow: 0 1px 3px rgba(0,0,0,.35); }
     .npt-sale.ets { color: #5fd08f; border-color: #3fb56f; }
     .npt-sale.regular { color: #f2d04a; border-color: #d9b52f; }
     .npt-sale.hts { color: #ff7b7b; border-color: #e65a5a; }
-    .npt-sale.quest { top: -3px; right: -3px; }
+    .npt-sale.quest { bottom: -3px; right: -3px; }
     .npt-note { position: fixed; right: 12px; bottom: 12px; z-index: 99999; max-width: 300px;
       font: 13px/1.45 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; color: #222;
       background: #fff8e6; border: 2px solid #e8a31b; border-radius: 10px; padding: 8px 10px;
