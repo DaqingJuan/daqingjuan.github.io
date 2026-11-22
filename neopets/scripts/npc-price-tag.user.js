@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      2.2
+// @version      2.3
 // @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
@@ -97,7 +97,27 @@
         /images\.neopets\.com\/items\//.test(i.src) && !i.closest(".sh-dock, .sh-tile, .npt-note, .search-helper") && i.getBoundingClientRect().width >= 30);
       if (img) out.push({ el: wrapImg(img), name: m[1].trim(), img: imgIdOf(img.src), shopPrice: 0, priced: false, quest: true });
     }
+    // 其他任務頁（太空船 Coincidence 等）：物品不一定在 .ingredient-grid 裡，改用通用找法，並在每樣物品下面補上查價連結
+    if (!out.length && !/darkfaerie/.test(location.pathname)) {
+      for (const c of collectGeneric()) {
+        if (!c.name) continue;
+        out.push({ ...c, shopPrice: 0, priced: false, quest: true });
+        addQuestLinks(c.el, c.name);
+      }
+    }
     return out;
+  }
+  // 在任務物品下面補：商店精靈、保險箱、查價（itemdb）連結
+  function addQuestLinks(wrap, name) {
+    const host = wrap.parentElement;
+    if (!host || host.querySelector(".npt-links")) return;
+    const q = encodeURIComponent(name);
+    const d = document.createElement("div");
+    d.className = "npt-links";
+    d.innerHTML = '<a href="/shops/wizard.phtml?string=' + q + '" target="_blank" rel="noopener">商店精靈</a> · ' +
+      '<a href="/safetydeposit.phtml?obj_name=' + q + '&category=0" target="_blank" rel="noopener">保險箱</a> · ' +
+      '<a href="https://itemdb.com.br/search?s=' + q + '" target="_blank" rel="noopener">查價</a>';
+    host.appendChild(d);
   }
 
   // 任務頁右下角摘要：材料市價合計（綠＝1 萬內、黃＝5 萬內、紅＝超過 5 萬）
@@ -340,6 +360,8 @@
       background: #fff8e6; border: 2px solid #e8a31b; border-radius: 10px; padding: 8px 10px;
       box-shadow: 0 4px 14px rgba(0,0,0,.2); }
     .npt-note a { color: #0b62c4; font-weight: 700; }
+    .npt-links { font-size: 11px; line-height: 1.4; margin-top: 2px; text-align: center; }
+    .npt-links a { color: #0b62c4; text-decoration: underline; }
     .npt-note button { margin-left: 6px; font: inherit; border: 0; background: none; cursor: pointer; color: #888; }
   `;
   document.head.appendChild(css);
