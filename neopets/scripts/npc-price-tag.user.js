@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC 商店行情標籤
 // @namespace    neopets-npc-price-tag
-// @version      2.3
+// @version      2.6
 // @description  在 NPC 商店、隱密塔、閣樓、交易站、拍賣場、圓頂屋車庫拍賣、二手店、Money Tree 等頁面，以及廚房／雪精靈／食人樹／Jhudora 任務頁，於物品圖片左上角顯示 itemdb 市價（資料來源 itemdb.com.br）
 // @match        https://www.neopets.com/objects.phtml*
 // @match        https://www.neopets.com/faerieland/hiddentower938.phtml*
@@ -35,6 +35,7 @@
 // itemdb 要求外掛腳本帶著它的登入狀態（cookie）才給查價；沒登入約 24 小時要再開一次，登入的話約 14 天。
 //
 // 標籤顏色（有標價的頁面：NPC 商店、隱密塔、閣樓、圓頂屋）：
+//   紅色＝市價比標價高 5 萬 NP 以上（很可以買）
 //   綠色＝市價比標價高 1 萬 NP 以上（值得搶）
 //   黃色＝市價比標價高，但不到 1 萬
 //   灰色＝市價不比標價高，或查不到行情
@@ -42,12 +43,17 @@
 //   綠色＝市價 10 萬以上　黃色＝1 萬～10 萬　灰色＝1 萬以下
 // 滑鼠移到標籤上可以看到店價、市價、價差和稀有度。
 //
-// 只顯示資料，不會自動點擊或購買。每頁最多向 itemdb 查一次，查過的價格會暫存 6 小時。
+// v2.6：左下角清單每件加上好賣／普通／難賣標籤，以及 🔗 查價（itemdb）、🔗 商店精靈連結。
+// v2.5：NPC 商店商品名稱下面標「好賣／普通／難賣」；利潤 5 萬以上用紅色標「很可以買」。
+// v2.4：NPC 商店左下角列出「利潤 ≥ 1 萬」的商品（由高到低），按「去買」會捲到該商品並打開 Neopets 的購買確認視窗，
+// 確認、驗證、出價都由你自己按。
+// 只顯示資料，不會自動購買或送出。每頁最多向 itemdb 查一次，查過的價格會暫存 6 小時。
 
 (() => {
   "use strict";
 
   const PROFIT_GOOD = 10000;          // 價差達到這個數字就標綠色
+  const PROFIT_HOT = 50000;           // 價差達到這個數字就標紅色（很可以買）
   const CACHE_MS = 6 * 60 * 60 * 1000; // 價格暫存 6 小時
   const CACHE_KEY = "npt-cache-v1";
 
@@ -111,6 +117,7 @@
   function addQuestLinks(wrap, name) {
     const host = wrap.parentElement;
     if (!host || host.querySelector(".npt-links")) return;
+    if (host.querySelectorAll("img").length > 2) return; // already has Neopets' own Search Helper icons (Shop Wizard, SDB...)
     const q = encodeURIComponent(name);
     const d = document.createElement("div");
     d.className = "npt-links";
@@ -363,6 +370,37 @@
     .npt-links { font-size: 11px; line-height: 1.4; margin-top: 2px; text-align: center; }
     .npt-links a { color: #0b62c4; text-decoration: underline; }
     .npt-note button { margin-left: 6px; font: inherit; border: 0; background: none; cursor: pointer; color: #888; }
+    .npt-tag.hot  { background: #d62828; font-size: 12px; box-shadow: 0 0 0 2px #fff, 0 1px 4px rgba(0,0,0,.4); }
+    .npt-sale-txt { display: inline-block; margin: 2px auto 0; padding: 0 6px; border-radius: 8px; border: 1px solid;
+      font: 700 11px/1.5 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+    .npt-sale-txt.ets { color: #17824a; border-color: #3fb56f; background: #e6f6ec; }
+    .npt-sale-txt.regular { color: #8a6a00; border-color: #d9b52f; background: #fff7d6; }
+    .npt-sale-txt.hts { color: #b42323; border-color: #e65a5a; background: #fdeaea; }
+    .npt-deal-hl { outline: 4px solid #1f9d55 !important; outline-offset: 2px; border-radius: 6px; }
+    .npt-deal-hl.npt-deal-hot { outline-color: #d62828 !important; outline-width: 5px; }
+    .npt-deals .row.hot .nm, .npt-deals .row.hot .gain { color: #d62828; }
+    .npt-deals .hot-badge { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 6px; background: #d62828; color: #fff; font-size: 11px; }
+    .npt-deals .row.hot .go { background: #d62828; }
+    .npt-deal-flash { animation: nptFlash 1s ease-in-out 3; }
+    @keyframes nptFlash { 50% { outline-color: #ffd54f; } }
+    .npt-deals { position: fixed; left: 12px; bottom: 12px; z-index: 99999; width: 300px; max-height: 60vh; overflow: auto;
+      font: 13px/1.4 -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif; color: #222;
+      background: #effaf3; border: 2px solid #1f9d55; border-radius: 10px; padding: 8px 10px; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+    .npt-deals h4 { margin: 0 0 6px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .npt-deals h4 button { border: 0; background: none; cursor: pointer; color: #888; font: inherit; }
+    .npt-deals .row { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid #cfe9d9; }
+    .npt-deals .row:first-of-type { border-top: 0; }
+    .npt-deals .info { flex: 1; min-width: 0; }
+    .npt-deals .nmrow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .npt-deals .nm { font-weight: 700; }
+    .npt-deals .sub { font-size: 11.5px; color: #555; }
+    .npt-deals .meta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin-top: 3px; font-size: 11.5px; }
+    .npt-deals .meta .npt-sale-txt { margin: 0; }
+    .npt-deals .meta a { color: #0b62c4; text-decoration: none; white-space: nowrap; }
+    .npt-deals .meta a:hover { text-decoration: underline; }
+    .npt-deals .gain { color: #1f9d55; font-weight: 700; }
+    .npt-deals .go { flex: none; border: 0; border-radius: 6px; padding: 5px 9px; background: #1f9d55; color: #fff; font: 700 12px sans-serif; cursor: pointer; }
+    .npt-deals .go:hover { background: #17824a; }
   `;
   document.head.appendChild(css);
 
@@ -398,7 +436,7 @@
         tag.title = `${c.name}\n市價約 ${hit.v.toLocaleString("en-US")} NP` + (hit.r ? `\n稀有度 r${hit.r}` : "") + "\n資料來源 itemdb.com.br";
       } else {
         const gain = hit.v - c.shopPrice;
-        tag.classList.add(gain >= PROFIT_GOOD ? "good" : gain > 0 ? "ok" : "none");
+        tag.classList.add(gain >= PROFIT_HOT ? "hot" : gain >= PROFIT_GOOD ? "good" : gain > 0 ? "ok" : "none");
         tag.textContent = zh(hit.v);
         tag.title = `${c.name}\n市價約 ${hit.v.toLocaleString("en-US")} NP\n店價 ${c.shopPrice.toLocaleString("en-US")} NP\n價差 ${gain >= 0 ? "+" : ""}${gain.toLocaleString("en-US")} NP` +
           (hit.r ? `\n稀有度 r${hit.r}` : "") + "\n資料來源 itemdb.com.br";
@@ -413,7 +451,72 @@
         sb.title = SALE[hit.s][1] + (hit.sp != null ? " (" + hit.sp + "% sold)" : "") + "\nitemdb.com.br";
         c.el.appendChild(sb);
       }
+      // NPC 商店：在商品名稱下面再標一次「好賣／普通／難賣」，字比較大、一眼看得到
+      const nameEl = c.el.closest(".shop-item")?.querySelector(".item-name");
+      if (nameEl) {
+        nameEl.parentElement.querySelector(".npt-sale-txt")?.remove();
+        if (hit.s && SALE[hit.s]) {
+          const st = document.createElement("div");
+          st.className = "npt-sale-txt " + hit.s;
+          st.textContent = SALE[hit.s][0];
+          st.title = SALE[hit.s][1] + (hit.sp != null ? " (" + hit.sp + "% sold)" : "");
+          nameEl.insertAdjacentElement("afterend", st);
+        }
+      }
     }
+  }
+
+  // ---------- NPC 商店：利潤 ≥ 1 萬的商品清單 ----------
+  // 左下角列出值得買的商品（利潤由高到低）。按「去買」= 捲到那件商品並幫你點它一下，
+  // 之後的確認、人機驗證、出價都由你自己做；腳本不會自動送出。
+  function dealsPanel(cells, cache) {
+    if (!/\/objects\.phtml/.test(location.pathname)) return;
+    const deals = [];
+    const seen = new Set();
+    for (const c of cells) {
+      c.el.classList.remove("npt-deal-hl", "npt-deal-hot");
+      const hit = cache[c.key];
+      if (!hit || hit.v == null || !c.shopPrice || c.quest) continue;
+      const gain = hit.v - c.shopPrice;
+      if (gain < PROFIT_GOOD) continue;
+      c.el.classList.add("npt-deal-hl");
+      if (gain >= PROFIT_HOT) c.el.classList.add("npt-deal-hot");
+      if (seen.has(c.el)) continue;
+      seen.add(c.el);
+      deals.push({ c, hit, gain });
+    }
+    document.querySelector(".npt-deals")?.remove();
+    if (!deals.length) return;
+    deals.sort((a, b) => b.gain - a.gain);
+    const box = document.createElement("div");
+    box.className = "npt-deals";
+    box.innerHTML = `<h4><span>利潤 ≥ ${zh(PROFIT_GOOD)}：${deals.length} 件</span><button type="button" aria-label="關閉">✕</button></h4>`;
+    box.querySelector("h4 button").onclick = () => box.remove();
+    for (const d of deals) {
+      const row = document.createElement("div");
+      const hot = d.gain >= PROFIT_HOT;
+      row.className = "row" + (hot ? " hot" : "");
+      const sale = { ets: "好賣", regular: "普通", hts: "難賣" }[d.hit.s] || "";
+      const q = encodeURIComponent(d.c.name);
+      row.innerHTML =
+        `<div class="info"><div class="nmrow"><span class="nm"></span>${hot ? '<span class="hot-badge">很可以買</span>' : ""}</div>` +
+        `<div class="sub">店 ${d.c.shopPrice.toLocaleString("en-US")} → 市 ${d.hit.v.toLocaleString("en-US")}　<span class="gain">+${d.gain.toLocaleString("en-US")}</span></div>` +
+        `<div class="meta">${sale ? `<span class="npt-sale-txt ${d.hit.s}">${sale}</span>` : ""}` +
+        `<a href="https://itemdb.com.br/search?s=${q}" target="_blank" rel="noopener" title="在 itemdb 看行情和成交紀錄">🔗 查價</a>` +
+        `<a href="/shops/wizard.phtml?string=${q}" target="_blank" rel="noopener" title="用商店精靈看玩家商店賣多少">🔗 商店精靈</a></div></div>` +
+        `<button type="button" class="go">去買</button>`;
+      row.querySelector(".nm").textContent = d.c.name;
+      row.querySelector(".nm").title = d.c.name;
+      row.querySelector(".go").onclick = () => {
+        const el = d.c.el;
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.remove("npt-deal-flash"); void el.offsetWidth; el.classList.add("npt-deal-flash");
+        // 跟你自己點商品圖一樣：打開這件商品的購買流程（有確認視窗就由你按）
+        setTimeout(() => (el.closest("a") || el).click(), 350);
+      };
+      box.appendChild(row);
+    }
+    document.body.appendChild(box);
   }
 
   let running = false;
@@ -439,6 +542,7 @@
     for (const k in cache) if (now - cache[k].t > CACHE_MS) delete cache[k];
     paint(cells, cache);
     questSummary(cells, cache);
+    dealsPanel(cells, cache);
 
     const need = [];
     const seen = new Set();
@@ -467,6 +571,7 @@
         saveCache(cache);
         paint(cells, cache);
         questSummary(cells, cache);
+        dealsPanel(cells, cache);
       }
     }
   }
@@ -479,7 +584,7 @@
     if (!collect().length && ++tries < 20) { setTimeout(start, 500); return; }
     run();
     // 交易站等頁面會動態換內容（切換分頁、翻頁），有新的東西出現就再跑一次；自己加的標籤不算
-    const ours = (n) => n.nodeType !== 1 || n.matches(".npt-tag, .npt-wrap, .npt-note") || n.closest(".npt-note");
+    const ours = (n) => n.nodeType !== 1 || n.matches(".npt-tag, .npt-sale, .npt-sale-txt, .npt-wrap, .npt-note, .npt-deals") || n.closest(".npt-note, .npt-deals");
     let timer = null;
     new MutationObserver((muts) => {
       if (!muts.some((m) => [...m.addedNodes].some((n) => !ours(n)))) return;
@@ -487,7 +592,7 @@
     }).observe(document.body, { childList: true, subtree: true });
     // 切換分頁時物品可能只是從隱藏變成顯示（沒有新增東西），所以點擊後也再檢查一次
     document.addEventListener("click", (e) => {
-      if (e.target.closest?.(".npt-tag, .npt-note")) return;
+      if (e.target.closest?.(".npt-tag, .npt-note, .npt-deals")) return;
       clearTimeout(timer); timer = setTimeout(run, 800);
     }, true);
   })();
